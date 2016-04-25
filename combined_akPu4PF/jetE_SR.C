@@ -169,7 +169,7 @@ void Muti_Plot(std::string mu_title,std::string selection,  const char **lineKin
 	legend1->AddEntry((TObject*)0,selection.c_str(),"");
 	cout<<"Var = "<<Var<<endl;
 	  if (Var.compare("jteta") == 0){ legend1->AddEntry((TObject*)0,"refpt>50","");}
-		if (Var.compare("refpt") == 0){ legend1->AddEntry((TObject*)0,"|#eta_{jet}|<2.0}","");}
+		if (Var.compare("refpt") == 0){ legend1->AddEntry((TObject*)0,"|#eta_{jet}|<2.0","");}
 	legend1->SetBorderSize(0);
 	legend1->Draw();
 
@@ -249,7 +249,7 @@ void jetE_SR()
 	double *VarBin;
 	int nVarBins;
 
-	std::string Var = Var_pt; // Var_pt for v.s refpt plot, Var_eta for v.s jteta plot
+	std::string Var = Var_eta; // Var_pt for v.s refpt plot, Var_eta for v.s jteta plot
 	if (Var.compare(Var_pt) == 0){
 		VarBin = ptBin;
 		nVarBins = nPtBins;  
@@ -267,7 +267,7 @@ void jetE_SR()
 	for(int icentBin =0; icentBin <nCentBins ; icentBin++){
 //		int icentBin=1;	
 		TCut CentBinCut = Form("bin>=%f && bin<=%f",centBin[icentBin],centBin[icentBin+1]);	
-		selection =Form("Centrality %i%-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2);
+		selection =Form("Centrality %i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2);
 
 		AllCut = tempAllCut && CentBinCut;
 		B_AllCut = B_Cut && AllCut;
