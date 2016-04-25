@@ -46,9 +46,12 @@ void pthat_weight(){
 	c_pthat->cd(3);
 	gPad->SetLogy();
   t_bjt->Draw("pthat>>h_pthat_bjtW","weight*(pthat<120 && abs(jteta)<2)");
+//  t_bjt->Draw("pthat>>h_pthat_bjtW","pthatweight*(pthat<120 && abs(jteta)<2)");
   c_pthat->cd(4);
   gPad->SetLogy();
   t_qcd->Draw("pthat>>h_pthat_qcdW","weight*(pthat<120 && abs(jteta)<2)");
+//  t_qcd->Draw("pthat>>h_pthat_qcdW","pthatweight*(pthat<120 && abs(jteta)<2)");
+
 
 	TCanvas *c_pthat_ratio = new TCanvas("c_pthat_ratio","c_pthat_ratio");
 	c_pthat_ratio->Divide(2,2);	
@@ -56,11 +59,23 @@ void pthat_weight(){
 	t_bjt30->Draw("pthat>>h_pthat30_bjt","abs(jteta)<2");
 	c_pthat_ratio->cd(2);
   t_qcd30->Draw("pthat>>h_pthat30_qcd","abs(jteta)<2");
+
+	double N_pthat30_bjt = h_pthat30_bjt->Integral();
+	double N_pthat30_qcd = h_pthat30_qcd->Integral(); 
+
+	double N_pthat_bjtW = h_pthat_bjtW->Integral();
+	double N_pthat_qcdW = h_pthat_qcdW->Integral();
+ 
+
 	c_pthat_ratio->cd(3);
-	h_pthat_bjtR->Divide(h_pthat_bjtW,h_pthat30_bjt);
+	h_pthat_bjtR->Divide(h_pthat_bjtW,h_pthat30_bjt,N_pthat30_bjt,N_pthat_bjtW);
+	h_pthat_bjtR->SetMaximum(3);
+	h_pthat_bjtR->SetMinimum(0.5);
 	h_pthat_bjtR->Draw();
 	c_pthat_ratio->cd(4);
-  h_pthat_qcdR->Divide(h_pthat_qcdW,h_pthat30_qcd);
+  h_pthat_qcdR->Divide(h_pthat_qcdW,h_pthat30_qcd,N_pthat30_qcd,N_pthat_qcdW);
+  h_pthat_qcdR->SetMaximum(3);
+  h_pthat_qcdR->SetMinimum(0.5);
 	h_pthat_qcdR->Draw();
 
 	TCanvas *c_pthat1 = new TCanvas("c_pthat1","c_pthat1");	
