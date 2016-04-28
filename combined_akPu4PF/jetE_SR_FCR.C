@@ -100,7 +100,7 @@ void fit_combine(TChain *tc, std::string Var, const double * VarBins_array , con
 
 	} // end   for(int ibin =0; ibin<nVarBins; ibin++)
 
-	Can_Temp[counter]->SaveAs(Form("./Plots/%s/fitPlots/fit_%s_%s_%s.pdf",Var.c_str(),Var.c_str(),jetTitle.c_str(),Gcut.GetTitle() ));
+	Can_Temp[counter]->SaveAs(Form("./fitPlots/FCR/%s/fit_%s_%s_%s.pdf",Var.c_str(),Var.c_str(),jetTitle.c_str(),Gcut.GetTitle() ));
 
 	counter++; 
 }
@@ -200,12 +200,12 @@ void Muti_Plot(std::string mu_title,std::string selection,  const char **lineKin
 			tex->Draw();
 			*/
 
-	Can_result[counter1]->SaveAs(Form("./Plots/%s/result_%s_%s_%s.pdf",Var.c_str(),mu_title.c_str(),selectionC.GetTitle() , Var.c_str())); 
+	Can_result[counter1]->SaveAs(Form("./Plots/FCR/%s/result_%s_%s_%s.pdf",Var.c_str(),mu_title.c_str(),selectionC.GetTitle() , Var.c_str())); 
 	counter1++;
 	cout<<"finish mutigraph"<<endl;
 }
 
-void jetE_SR()
+void jetE_SR_FCR()
 {
 
 	char filename[]="JetESR_result.txt";
@@ -242,15 +242,15 @@ void jetE_SR()
 	const int nCentBins = sizeof(centBin) / sizeof(centBin[0]) -1;
 
 //	gStyle->SetOptFit(1111);
-//	gStyle->SetOptFit(0);
+	gStyle->SetOptFit(0);
 	std::string Var_pt = "refpt";
 	std::string Var_cent = "bin";
 	std::string Var_eta = "jteta";
 
 	std::string measurement="JES_akPu4PF";
 	std::string selection ="Centrality 0-100%";
-	const char *lineKind[]={"Inclusive Jets","bJets","csV>0.9 bJets","csV>0.9 lightJets"};
-
+//	const char *lineKind[]={"Inclusive Jets","bJets","csV>0.9 bJets","FCR bJets","FCR csV>0.9 bJets"};
+const char *lineKind[]={"FCR csV>0.9 bJets","bJets","csV>0.9 bJets","FCR bJets"};
 
 	TCut Cut_refpt = "refpt>50";
 	TCut Cut_eta2 = "abs(jteta)<2";
@@ -258,12 +258,15 @@ void jetE_SR()
 	TCut B_Cut = "abs(refparton_flavorForB)==5";
 	TCut tempAllCut = Cut_eta2;
 	TCut csvtag = "discr_csvV1_>0.9";
+	TCut FCR_Cut = "bProdCode==1";
 
 	TCut AllCut;
 	TCut Light_AllCut;
 	TCut B_AllCut;
 	TCut csvB_AllCut;
 	TCut csvL_Allcut;
+	TCut FCRB_AllCut;
+	TCut FCRcsvB_AllCut;
 
 	double *VarBin;
 	int nVarBins;
@@ -287,6 +290,9 @@ void jetE_SR()
 	TProfile *hf_qcd[4];
 	TProfile *hf_bjt[4];
 	TProfile *hf_csvbjt[4];
+	TProfile *hf_FCRbjt[4];
+	TProfile *hf_FCRcsvbjt[4];
+
 
 	for(int icentBin =0; icentBin <nCentBins ; icentBin++){
 //		int icentBin=1;	
@@ -297,53 +303,107 @@ void jetE_SR()
 		B_AllCut = B_Cut && AllCut;
 		csvB_AllCut = csvtag && B_AllCut;
 		csvL_Allcut = csvtag && Light_Cut && AllCut;	
+		FCRB_AllCut = FCR_Cut && B_AllCut;
+		FCRcsvB_AllCut = FCR_Cut && csvB_AllCut;
 
 		c_JES_prof->cd(icentBin+1);
-//    gStyle->SetOptStat(0);
+    gStyle->SetOptStat(0);
 
 	  if (Var.compare(Var_pt) == 0){
-		hf_qcd[icentBin] = new TProfile(Form("hf_qcd_%i",(int)icentBin),Form("centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 16,40,200,0.8,1.2);
+/*		hf_qcd[icentBin] = new TProfile(Form("hf_qcd_%i",(int)icentBin),Form("centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 16,40,200,0.8,1.2);
 		tc_qcd->Draw(Form("jtpt/refpt:refpt>>hf_qcd_%i",(int)icentBin),(AllCut && refpt200)*"weight","prof");
 		hf_qcd[icentBin]->SetLineColor(1);
 		hf_qcd[icentBin]->SetMaximum(1.025);
 		hf_qcd[icentBin]->SetMinimum(0.96);
 		hf_qcd[icentBin]->GetXaxis()->SetTitle("refpt");
 		hf_qcd[icentBin]->GetYaxis()->SetTitle("jtpt/refpt");
+*/
 		hf_bjt[icentBin] = new TProfile(Form("hf_bjt_%i",(int)icentBin),Form("bjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 16,40,200,0.8,1.2);
     tc_bjt->Draw(Form("jtpt/refpt:refpt>>hf_bjt_%i",(int)icentBin),(B_AllCut && refpt200)*"weight","profSAME");
 		hf_bjt[icentBin]->SetLineColor(2);
+
+    hf_bjt[icentBin]->SetMaximum(1.05);
+    hf_bjt[icentBin]->SetMinimum(0.96);
+    hf_bjt[icentBin]->GetXaxis()->SetTitle("refpt");
+    hf_bjt[icentBin]->GetYaxis()->SetTitle("jtpt/refpt");
+
+
     hf_csvbjt[icentBin] = new TProfile(Form("hf_csvbjt_%i",(int)icentBin),Form("csvbjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 16,40,200,0.8,1.2);
 		tc_bjt->Draw(Form("jtpt/refpt:refpt>>hf_csvbjt_%i",(int)icentBin),(csvB_AllCut && refpt200)*"weight","profSAME");
     hf_csvbjt[icentBin]->SetLineColor(3);
+
+    hf_FCRbjt[icentBin] = new TProfile(Form("hf_FCRbjt_%i",(int)icentBin),Form("FCRbjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 16,40,200,0.8,1.2);
+    tc_bjt->Draw(Form("jtpt/refpt:refpt>>hf_FCRbjt_%i",(int)icentBin),(FCRB_AllCut && refpt200)*"weight","profSAME");
+    hf_FCRbjt[icentBin]->SetLineColor(4);
+    hf_FCRcsvbjt[icentBin] = new TProfile(Form("hf_FCRcsvbjt_%i",(int)icentBin),Form("FCRcsvbjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 16,40,200,0.8,1.2);
+    tc_bjt->Draw(Form("jtpt/refpt:refpt>>hf_FCRcsvbjt_%i",(int)icentBin),(FCRcsvB_AllCut && refpt200)*"weight","profSAME");
+    hf_FCRcsvbjt[icentBin]->SetLineColor(1);
+
 		TLegend *le_prof = new TLegend(0.65,0.75,0.85,0.88);
-		le_prof->AddEntry(hf_qcd[icentBin],"Inclusive Jet","l");
+//		le_prof->AddEntry(hf_qcd[icentBin],"Inclusive Jet","l");
 		le_prof->AddEntry(hf_bjt[icentBin],"bJet","l");
     le_prof->AddEntry(hf_csvbjt[icentBin],"csv>0.9 bJet","l");
+    le_prof->AddEntry(hf_FCRbjt[icentBin],"FCR bJet","l");
+    le_prof->AddEntry(hf_FCRcsvbjt[icentBin],"csv>0.9 FCR bJet","l");
 		le_prof->SetBorderSize(0);
 		le_prof->Draw();
+
+	  TLegend *le_prof1 = new TLegend(0.3,0.80,0.6,0.88);
+  	le_prof1->SetBorderSize(0);
+
+    le_prof1->AddEntry((TObject*)0,"|#eta_{jet}|<2.0","");
+    le_prof1->Draw();
+
 		
 		}
 
     if (Var.compare(Var_eta) == 0){
-    hf_qcd[icentBin] = new TProfile(Form("hf_qcd_%i",(int)icentBin),Form("centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 10,-2,2,0.8,1.2);
+
+/*    hf_qcd[icentBin] = new TProfile(Form("hf_qcd_%i",(int)icentBin),Form("centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 10,-2,2,0.8,1.2);
     tc_qcd->Draw(Form("jtpt/refpt:jteta>>hf_qcd_%i",(int)icentBin),(AllCut && refpt200)*"weight","prof");
     hf_qcd[icentBin]->SetLineColor(1);
     hf_qcd[icentBin]->SetMaximum(1.055);
     hf_qcd[icentBin]->SetMinimum(0.955);
     hf_qcd[icentBin]->GetXaxis()->SetTitle("jteta");
     hf_qcd[icentBin]->GetYaxis()->SetTitle("jtpt/refpt");
+*/
     hf_bjt[icentBin] = new TProfile(Form("hf_bjt_%i",(int)icentBin),Form("bjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 10,-2,2,0.8,1.2);
     tc_bjt->Draw(Form("jtpt/refpt:jteta>>hf_bjt_%i",(int)icentBin),(B_AllCut && refpt200)*"weight","profSAME");
     hf_bjt[icentBin]->SetLineColor(2);
+
+//    hf_bjt[icentBin]->SetLineColor(1);
+    hf_bjt[icentBin]->SetMaximum(1.06);
+    hf_bjt[icentBin]->SetMinimum(0.95);
+    hf_bjt[icentBin]->GetXaxis()->SetTitle("jteta");
+    hf_bjt[icentBin]->GetYaxis()->SetTitle("jtpt/refpt");
+
     hf_csvbjt[icentBin] = new TProfile(Form("hf_csvbjt_%i",(int)icentBin),Form("csvbjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 10,-2,2,0.8,1.2);
     tc_bjt->Draw(Form("jtpt/refpt:jteta>>hf_csvbjt_%i",(int)icentBin),(csvB_AllCut && refpt200)*"weight","profSAME");
     hf_csvbjt[icentBin]->SetLineColor(3);
+
+    hf_FCRbjt[icentBin] = new TProfile(Form("hf_FCRbjt_%i",(int)icentBin),Form("FCRbjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 10,-2,2,0.8,1.2);
+    tc_bjt->Draw(Form("jtpt/refpt:jteta>>hf_FCRbjt_%i",(int)icentBin),(FCRB_AllCut && refpt200)*"weight","profSAME");
+    hf_FCRbjt[icentBin]->SetLineColor(4);
+    hf_FCRcsvbjt[icentBin] = new TProfile(Form("hf_FCRcsvbjt_%i",(int)icentBin),Form("FCRcsvbjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 10,-2,2,0.8,1.2);
+    tc_bjt->Draw(Form("jtpt/refpt:jteta>>hf_FCRcsvbjt_%i",(int)icentBin),(FCRcsvB_AllCut && refpt200)*"weight","profSAME");
+    hf_FCRcsvbjt[icentBin]->SetLineColor(1);
+
+
     TLegend *le_prof = new TLegend(0.65,0.75,0.85,0.88);
-    le_prof->AddEntry(hf_qcd[icentBin],"Inclusive Jet","l");
+//    le_prof->AddEntry(hf_qcd[icentBin],"Inclusive Jet","l");
     le_prof->AddEntry(hf_bjt[icentBin],"bJet","l");
     le_prof->AddEntry(hf_csvbjt[icentBin],"csv>0.9 bJet","l");
+    le_prof->AddEntry(hf_FCRbjt[icentBin],"FCR bJet","l");
+    le_prof->AddEntry(hf_FCRcsvbjt[icentBin],"csv>0.9 FCR bJet","l");
     le_prof->SetBorderSize(0);
     le_prof->Draw();
+
+	  TLegend *le_prof1 = new TLegend(0.3,0.80,0.6,0.88);
+  	le_prof1->SetBorderSize(0);
+
+    le_prof1->AddEntry((TObject*)0,"refpt>50","");
+    le_prof1->Draw();
+
 
     }
 
@@ -355,7 +415,7 @@ void jetE_SR()
 		double ImeanErr_pt_akPu4PF[nVarBins];
 		double Isigma_pt_akPu4PF[nVarBins];
 		double IsigmaErr_pt_akPu4PF[nVarBins];
-		fit_combine(tc_qcd , Var, VarBin , nVarBins, AllCut , Imean_pt_akPu4PF, ImeanErr_pt_akPu4PF, Isigma_pt_akPu4PF, IsigmaErr_pt_akPu4PF);
+//		fit_combine(tc_qcd , Var, VarBin , nVarBins, AllCut , Imean_pt_akPu4PF, ImeanErr_pt_akPu4PF, Isigma_pt_akPu4PF, IsigmaErr_pt_akPu4PF);
 
 		double Bmean_pt_akPu4PF[nVarBins];
 		double BmeanErr_pt_akPu4PF[nVarBins];
@@ -369,6 +429,20 @@ void jetE_SR()
 		double csvBsigmaErr_pt_akPu4PF[nVarBins];
 		fit_combine(tc_bjt , Var, VarBin , nVarBins, csvB_AllCut , csvBmean_pt_akPu4PF, csvBmeanErr_pt_akPu4PF, csvBsigma_pt_akPu4PF, csvBsigmaErr_pt_akPu4PF);
 
+    double FCRBmean_pt_akPu4PF[nVarBins];
+    double FCRBmeanErr_pt_akPu4PF[nVarBins];
+    double FCRBsigma_pt_akPu4PF[nVarBins];
+    double FCRBsigmaErr_pt_akPu4PF[nVarBins];
+    fit_combine(tc_bjt , Var, VarBin , nVarBins, FCRB_AllCut , FCRBmean_pt_akPu4PF, FCRBmeanErr_pt_akPu4PF, FCRBsigma_pt_akPu4PF, FCRBsigmaErr_pt_akPu4PF);
+
+    double FCRcsvBmean_pt_akPu4PF[nVarBins];
+    double FCRcsvBmeanErr_pt_akPu4PF[nVarBins];
+    double FCRcsvBsigma_pt_akPu4PF[nVarBins];
+    double FCRcsvBsigmaErr_pt_akPu4PF[nVarBins];
+    fit_combine(tc_bjt , Var, VarBin , nVarBins, FCRcsvB_AllCut , FCRcsvBmean_pt_akPu4PF, FCRcsvBmeanErr_pt_akPu4PF, FCRcsvBsigma_pt_akPu4PF, FCRcsvBsigmaErr_pt_akPu4PF);
+
+
+
 
 		double csvLmean_pt_akPu4PF[nVarBins];
 		double csvLmeanErr_pt_akPu4PF[nVarBins];
@@ -376,16 +450,22 @@ void jetE_SR()
 		double csvLsigmaErr_pt_akPu4PF[nVarBins];
 		//  fit_combine(tc_qcd , Var, VarBin , nVarBins, csvL_Allcut , csvLmean_pt_akPu4PF, csvLmeanErr_pt_akPu4PF, csvLsigma_pt_akPu4PF, csvLsigmaErr_pt_akPu4PF);
 
+/*
+		double *mean2D_pt_akPu4PF[5]={Imean_pt_akPu4PF , Bmean_pt_akPu4PF,csvBmean_pt_akPu4PF,FCRBmean_pt_akPu4PF,FCRcsvBmean_pt_akPu4PF};
+		double *meanErr2D_pt_akPu4PF[5]={ImeanErr_pt_akPu4PF, BmeanErr_pt_akPu4PF,csvBmeanErr_pt_akPu4PF, FCRBmeanErr_pt_akPu4PF,FCRcsvBmeanErr_pt_akPu4PF};
+		double *sigma2D_pt_akPu4PF[5]={Isigma_pt_akPu4PF,Bsigma_pt_akPu4PF,csvBsigma_pt_akPu4PF,FCRBsigma_pt_akPu4PF,FCRcsvBsigma_pt_akPu4PF};
+		double *sigmaErr2D_pt_akPu4PF[5]={IsigmaErr_pt_akPu4PF,BsigmaErr_pt_akPu4PF,csvBsigmaErr_pt_akPu4PF,FCRBsigmaErr_pt_akPu4PF,FCRcsvBsigmaErr_pt_akPu4PF};
+*/
 
-		double *mean2D_pt_akPu4PF[4]={Imean_pt_akPu4PF , Bmean_pt_akPu4PF,csvBmean_pt_akPu4PF,csvLmean_pt_akPu4PF};
-		double *meanErr2D_pt_akPu4PF[4]={ImeanErr_pt_akPu4PF, BmeanErr_pt_akPu4PF,csvBmeanErr_pt_akPu4PF,csvLmeanErr_pt_akPu4PF};
-		double *sigma2D_pt_akPu4PF[4]={Isigma_pt_akPu4PF,Bsigma_pt_akPu4PF,csvBsigma_pt_akPu4PF,csvLsigma_pt_akPu4PF};
-		double *sigmaErr2D_pt_akPu4PF[4]={IsigmaErr_pt_akPu4PF,BsigmaErr_pt_akPu4PF,csvBsigmaErr_pt_akPu4PF,csvLsigmaErr_pt_akPu4PF};
+    double *mean2D_pt_akPu4PF[4]={FCRcsvBmean_pt_akPu4PF,Bmean_pt_akPu4PF,csvBmean_pt_akPu4PF,FCRBmean_pt_akPu4PF};
+    double *meanErr2D_pt_akPu4PF[4]={FCRcsvBmeanErr_pt_akPu4PF,BmeanErr_pt_akPu4PF,csvBmeanErr_pt_akPu4PF, FCRBmeanErr_pt_akPu4PF};
+    double *sigma2D_pt_akPu4PF[4]={FCRcsvBsigma_pt_akPu4PF,Bsigma_pt_akPu4PF,csvBsigma_pt_akPu4PF,FCRBsigma_pt_akPu4PF};
+    double *sigmaErr2D_pt_akPu4PF[4]={FCRcsvBsigmaErr_pt_akPu4PF,BsigmaErr_pt_akPu4PF,csvBsigmaErr_pt_akPu4PF,FCRBsigmaErr_pt_akPu4PF};
 
 		measurement="JES";
-		Muti_Plot(measurement,selection, lineKind , AllCut, Var, 3, nVarBins , VarBin , mean2D_pt_akPu4PF, meanErr2D_pt_akPu4PF);
+		Muti_Plot(measurement,selection, lineKind , AllCut, Var, 4, nVarBins , VarBin , mean2D_pt_akPu4PF, meanErr2D_pt_akPu4PF);
 		measurement="JER";
-		Muti_Plot(measurement,selection, lineKind , AllCut, Var, 3, nVarBins , VarBin , sigma2D_pt_akPu4PF, sigmaErr2D_pt_akPu4PF);
+		Muti_Plot(measurement,selection, lineKind , AllCut, Var, 4, nVarBins , VarBin , sigma2D_pt_akPu4PF, sigmaErr2D_pt_akPu4PF);
 
 	}// end for(icentBin)
 

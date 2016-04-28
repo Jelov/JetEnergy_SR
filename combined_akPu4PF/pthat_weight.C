@@ -18,13 +18,15 @@ void pthat_weight(){
 	TTree *t_bjt30 =(TTree*)f_bjt30->Get("akPu4PFJetAnalyzer/t");	
 	TTree *t_qcd30 =(TTree*)f_qcd30->Get("akPu4PFJetAnalyzer/t");
 
+	int pthatbin =200;
+	double pthatlow =0;
+	double pthathi =200;
 
+	TH1D *h_pthat_bjt = new TH1D("h_pthat_bjt","bjet",200,0,200);
+	TH1D *h_pthat_qcd = new TH1D("h_pthat_qcd","qcd",200,0,200);
 
-	TH1D *h_pthat_bjt = new TH1D("h_pthat_bjt","bjet",140,0,140);
-	TH1D *h_pthat_qcd = new TH1D("h_pthat_qcd","qcd",140,0,140);
-
-  TH1D *h_pthat_bjtW = new TH1D("h_pthat_bjtW","bjet*weight",140,0,140);
-  TH1D *h_pthat_qcdW = new TH1D("h_pthat_qcdW","qcd*weight",140,0,140);
+  TH1D *h_pthat_bjtW = new TH1D("h_pthat_bjtW","bjet* weight",200,0,200);
+  TH1D *h_pthat_qcdW = new TH1D("h_pthat_qcdW","qcd*weight",200,0,200);
 
   TH1D *h_pthat30_bjt = new TH1D("h_pthat30_bjt","bjet_pthat30",140,0,140);
   TH1D *h_pthat30_qcd = new TH1D("h_pthat30_qcd","qcd_pthat30",140,0,140);	
@@ -45,20 +47,20 @@ void pthat_weight(){
   t_qcd->Draw("pthat>>h_pthat_qcd","pthat<120 && abs(jteta)<2");
 	c_pthat->cd(3);
 	gPad->SetLogy();
-  t_bjt->Draw("pthat>>h_pthat_bjtW","weight*(pthat<120 && abs(jteta)<2)");
+  t_bjt->Draw("pthat>>h_pthat_bjtW","pthatweight*(pthat<200 && abs(jteta)<2)");
 //  t_bjt->Draw("pthat>>h_pthat_bjtW","pthatweight*(pthat<120 && abs(jteta)<2)");
   c_pthat->cd(4);
   gPad->SetLogy();
-  t_qcd->Draw("pthat>>h_pthat_qcdW","weight*(pthat<120 && abs(jteta)<2)");
+  t_qcd->Draw("pthat>>h_pthat_qcdW","pthatweight*(pthat<200 && abs(jteta)<2)");
 //  t_qcd->Draw("pthat>>h_pthat_qcdW","pthatweight*(pthat<120 && abs(jteta)<2)");
 
 
 	TCanvas *c_pthat_ratio = new TCanvas("c_pthat_ratio","c_pthat_ratio");
 	c_pthat_ratio->Divide(2,2);	
 	c_pthat_ratio->cd(1);
-	t_bjt30->Draw("pthat>>h_pthat30_bjt","abs(jteta)<2");
+	t_bjt->Draw("pthat>>h_pthat30_bjt","(abs(jteta)<2 && pthatsample ==30)");
 	c_pthat_ratio->cd(2);
-  t_qcd30->Draw("pthat>>h_pthat30_qcd","abs(jteta)<2");
+  t_qcd->Draw("pthat>>h_pthat30_qcd","(abs(jteta)<2 && pthatsample ==30)");
 
 	double N_pthat30_bjt = h_pthat30_bjt->Integral();
 	double N_pthat30_qcd = h_pthat30_qcd->Integral(); 
@@ -79,18 +81,20 @@ void pthat_weight(){
 	h_pthat_qcdR->Draw();
 
 	TCanvas *c_pthat1 = new TCanvas("c_pthat1","c_pthat1");	
-	c_pthat1->Divide(2,2);
+	c_pthat1->Divide(2,1);
 	c_pthat1->cd(1);
   gPad->SetLogy();
+	h_pthat_bjtW->GetXaxis()->SetTitle("pthat");
 	h_pthat_bjtW->Draw();
 	c_pthat1->cd(2);
   gPad->SetLogy();
+  h_pthat_qcdW->GetXaxis()->SetTitle("pthat");
 	h_pthat_qcdW->Draw();
-	c_pthat1->cd(3);
+/*	c_pthat1->cd(3);
 	h_pthat_bjtR->Draw();
 	c_pthat1->cd(4);
 	h_pthat_qcdR->Draw();
-
+*/
 	
 
 

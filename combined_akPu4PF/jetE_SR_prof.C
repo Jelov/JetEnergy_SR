@@ -70,7 +70,11 @@ void fit_combine(TChain *tc, std::string Var, const double * VarBins_array , con
 		tc->Draw( Form("jtpt/refpt>>h_Ratio[%d]",ibin ) , allcut*"weight" );
 
 		h_Ratio[ibin]->GetXaxis()->SetTitle(Form("%s, jtpt/refpt",Gcut.GetTitle()));
-
+		mean[ibin]=h_Ratio[ibin]->GetMean();
+		meanErr[ibin]=h_Ratio[ibin]->GetMeanError();
+		sigma[ibin]=h_Ratio[ibin]->GetRMS();
+		sigmaErr[ibin]=h_Ratio[ibin]->GetRMSError();
+/*
 		f_Ratio[ibin] = new TF1(Form("f_Ratio_%d",ibin), "gaus",0.4,1.6 );
 		f_Ratio[ibin]->SetParameter(0,h_Ratio[ibin]->GetEntries()); // get number for normalization
 		if(ibin==0){
@@ -85,22 +89,16 @@ void fit_combine(TChain *tc, std::string Var, const double * VarBins_array , con
 		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MRL");
 		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
 		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
-		/*
-			 legendfit[ibin]= new TLegend(0.2,0.2,0.7,0.4);
-			 legendfit[ibin]->AddEntry((TObject*)0,Form("%s",Gcut.GetTitle()),"");
-			 legendfit[ibin]->SetBorderSize(0);
-			 legendfit[ibin]->Draw();
-			 */
 
 
 		mean[ibin] = f_Ratio[ibin]->GetParameter(1);
 		meanErr[ibin] = f_Ratio[ibin]->GetParError(1);
 		sigma[ibin] = f_Ratio[ibin]->GetParameter(2);
 		sigmaErr[ibin] = f_Ratio[ibin]->GetParError(2);
-
+*/
 	} // end   for(int ibin =0; ibin<nVarBins; ibin++)
 
-	Can_Temp[counter]->SaveAs(Form("./Plots/%s/fitPlots/fit_%s_%s_%s.pdf",Var.c_str(),Var.c_str(),jetTitle.c_str(),Gcut.GetTitle() ));
+//	Can_Temp[counter]->SaveAs(Form("./Plots/%s/fitPlots/fit_%s_%s_%s.pdf",Var.c_str(),Var.c_str(),jetTitle.c_str(),Gcut.GetTitle() ));
 
 	counter++; 
 }
@@ -200,12 +198,12 @@ void Muti_Plot(std::string mu_title,std::string selection,  const char **lineKin
 			tex->Draw();
 			*/
 
-	Can_result[counter1]->SaveAs(Form("./Plots/%s/result_%s_%s_%s.pdf",Var.c_str(),mu_title.c_str(),selectionC.GetTitle() , Var.c_str())); 
+	Can_result[counter1]->SaveAs(Form("./Plots/%s/Simple_result_%s_%s_%s.pdf",Var.c_str(),mu_title.c_str(),selectionC.GetTitle() , Var.c_str())); 
 	counter1++;
 	cout<<"finish mutigraph"<<endl;
 }
 
-void jetE_SR()
+void jetE_SR_prof()
 {
 
 	char filename[]="JetESR_result.txt";
@@ -268,7 +266,7 @@ void jetE_SR()
 	double *VarBin;
 	int nVarBins;
 
-	std::string Var = Var_pt; // Var_pt for v.s refpt plot, Var_eta for v.s jteta plot
+	std::string Var = Var_eta; // Var_pt for v.s refpt plot, Var_eta for v.s jteta plot
 	if (Var.compare(Var_pt) == 0){
 		VarBin = ptBin;
 		nVarBins = nPtBins;  
@@ -300,7 +298,7 @@ void jetE_SR()
 
 		c_JES_prof->cd(icentBin+1);
 //    gStyle->SetOptStat(0);
-
+/*
 	  if (Var.compare(Var_pt) == 0){
 		hf_qcd[icentBin] = new TProfile(Form("hf_qcd_%i",(int)icentBin),Form("centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 16,40,200,0.8,1.2);
 		tc_qcd->Draw(Form("jtpt/refpt:refpt>>hf_qcd_%i",(int)icentBin),(AllCut && refpt200)*"weight","prof");
@@ -346,7 +344,7 @@ void jetE_SR()
     le_prof->Draw();
 
     }
-
+*/
 
 
 
