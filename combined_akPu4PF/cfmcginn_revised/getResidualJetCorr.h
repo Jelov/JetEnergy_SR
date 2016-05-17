@@ -90,21 +90,21 @@ Float_t getResCorrJetPt(Float_t jtPt, Int_t hiBin, Int_t type)
     }
   }
 	Float_t corrJtPt =-998; 
-	if(type ==0){ 
+	if(type ==0){ // for Inclusive jet
   corrJtPt = jtPt/residualJetCorrFuncs_p[centPos]->Eval(jtPt);
 	}
-	else if(type ==1){
+	else if(type ==1){ // for b-jet
   corrJtPt = jtPt/BresidualJetCorrFuncs_p[centPos]->Eval(jtPt);	
 	}
-  else if(type ==2){
+  else if(type ==2){ // for csv>0.9 b-jet
   corrJtPt = jtPt/csvBresidualJetCorrFuncs_p[centPos]->Eval(jtPt);
   }
-  else if(type ==3){
+  else if(type ==3){ // for FCR b-jet
   corrJtPt = jtPt/FCRBresidualJetCorrFuncs_p[centPos]->Eval(jtPt);
   }
-  else if(type ==4){
-  corrJtPt = jtPt/FCRcsvBresidualJetCorrFuncs_p[centPos]->Eval(jtPt);
-  }
+//  else if(type ==4){
+//  corrJtPt = jtPt/FCRcsvBresidualJetCorrFuncs_p[centPos]->Eval(jtPt);
+//  }
 	else { 
 		std::cout<<"Input type is wrong , use type 0~4 to get jtpt correc, REturn -999"<<std::endl;
 		return -999;

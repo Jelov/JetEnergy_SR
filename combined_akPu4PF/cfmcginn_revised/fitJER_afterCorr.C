@@ -16,6 +16,8 @@ const Int_t nCentBins = 4;
 const Int_t centBins[nCentBins+1] = {0, 10, 30, 50, 100};
 
 //TCanvas *c_fit = new TCanvas("c_fit","c_fit");
+double para_c = 0;
+double para_s = 0;
 
 void FitSigma(TH1F* hist_p,int iter, TH1F* histPerph_p = NULL)
 {
@@ -36,14 +38,14 @@ void FitSigma(TH1F* hist_p,int iter, TH1F* histPerph_p = NULL)
   Float_t par1 = (yVal1 - par0)*TMath::Sqrt(xVal1);
   Float_t par2 = (yVal0 - par0 - par1/TMath::Sqrt(xVal0))*xVal0;
 
-	cout<<"initial par0 = "<<par0<<" ,par1 = "<<par1<<" ,par2 = "<<par2<<endl;
-	par1 = 8;
+//	cout<<"initial par0 = "<<par0<<" ,par1 = "<<par1<<" ,par2 = "<<par2<<endl;
+	par2 = 8;
 	if(iter == 1)
-	par1 = 6;	
+	par2 = 6;	
 	if(iter == 2)
-	par1 = 5;
+	par2 = 5;
 	if(iter == 3)
-	par1 = 0.01;	
+	par2 = 0.01;	
 	
   if(histPerph_p != NULL){
     par0 = histPerph_p->GetFunction("f1_p")->GetParameter(0);
@@ -53,12 +55,37 @@ void FitSigma(TH1F* hist_p,int iter, TH1F* histPerph_p = NULL)
   f1_p->SetParameter(0, par0);
   if(histPerph_p != NULL) f1_p->SetParLimits(0, par0-par0Err, par0+par0Err);
   // else f1_p->SetParLimits(0, .9, 1.05);
-	f1_p->SetParLimits(0, .01, 1.05);
+	if(iter == 3){
+	f1_p->SetParLimits(0, .00001, 1.05);
   f1_p->SetParameter(1, par1);
+	}
+  else {
+	cout<<"iter ="<<iter<<" ,para_c = "<<para_c<<" ,para_s = "<<para_s<<endl;
+//	f1_p->SetParLimits(0, para_c, para_c);
+//	f1_p->SetParLimits(1, para_s, para_s);	
+	f1_p->FixParameter(0, para_c);
+	f1_p->FixParameter(1, para_s);
+	}	
   f1_p->SetParameter(2, par2);
 
+	cout<<"iter = "<<iter<<endl;
+  cout<<"inital par0 C= "<<f1_p->GetParameter(0)<<" ,par1 S= "<<f1_p->GetParameter(1)<<" ,par2 N= "<<f1_p->GetParameter(2)<<endl;
+
+
   hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
+  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
+  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
+  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
+  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
+
+	if(iter == 3){
+	para_c = f1_p->GetParameter(0);
+	para_s = f1_p->GetParameter(1);
+	cout<<"iter 3, para_c = "<<para_c<<endl;
+  cout<<"iter 3, para_s = "<<para_s<<endl;	
+	}
   cout<<"final par0 C= "<<f1_p->GetParameter(0)<<" ,par1 S= "<<f1_p->GetParameter(1)<<" ,par2 N= "<<f1_p->GetParameter(2)<<endl;
+	if(iter == 0){cout<<endl;}
 
 
 //	hist_p->Draw(); // j
@@ -96,26 +123,29 @@ void fitJER_afterCorr()
 
 //  TH1F* recoToGenHist_p[nCentBins];
 
-  for(Int_t iter = 0; iter < nCentBins; iter++){
+//  for(Int_t iter = 0; iter < nCentBins; iter++)
+	for(Int_t iter = nCentBins-1; iter>=0; iter--)
+{
     sigmaHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
     BsigmaHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_B_FitSigma_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
     csvBsigmaHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_csvB_FitSigma_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
     FCRBsigmaHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
-    FCRcsvBsigmaHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
+//    FCRcsvBsigmaHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
 
 
 //    recoToGenHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVRecoPt_Inc_FitSigma_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
 
-    std::cout << "iter: " << iter << std::endl;
+//    std::cout << "iter: " << iter << std::endl;
 
     FitSigma(sigmaHist_p[iter],iter);
-    FitSigma(BsigmaHist_p[iter],iter);
-    FitSigma(csvBsigmaHist_p[iter],iter);
-    FitSigma(FCRBsigmaHist_p[iter],iter);
-    FitSigma(FCRcsvBsigmaHist_p[iter],iter);
+}
+  for(Int_t iter = nCentBins-1; iter>=0; iter--){ FitSigma(BsigmaHist_p[iter],iter);}
+  for(Int_t iter = nCentBins-1; iter>=0; iter--){ FitSigma(csvBsigmaHist_p[iter],iter);}
+  for(Int_t iter = nCentBins-1; iter>=0; iter--){ FitSigma(FCRBsigmaHist_p[iter],iter);}
+//    FitSigma(FCRcsvBsigmaHist_p[iter],iter);
 
 //		c_fit->cd(iter-1);
-  }
+  
 
 		std::string outFileName = "CORR_JER.root";
 //  std::string outFileName = inFileName;
@@ -132,7 +162,7 @@ void fitJER_afterCorr()
     BsigmaHist_p[iter]->Write(Form("BJERCorr_cent%dto%d_h", centBins[iter], centBins[iter+1]), TObject::kOverwrite);
     csvBsigmaHist_p[iter]->Write(Form("csvBJERCorr_cent%dto%d_h", centBins[iter], centBins[iter+1]), TObject::kOverwrite);
     FCRBsigmaHist_p[iter]->Write(Form("FCRBJERCorr_cent%dto%d_h", centBins[iter], centBins[iter+1]), TObject::kOverwrite);
-    FCRcsvBsigmaHist_p[iter]->Write(Form("FCRcsvBJERCorr_cent%dto%d_h", centBins[iter], centBins[iter+1]), TObject::kOverwrite);
+//    FCRcsvBsigmaHist_p[iter]->Write(Form("FCRcsvBJERCorr_cent%dto%d_h", centBins[iter], centBins[iter+1]), TObject::kOverwrite);
 
  //   recoToGenHist_p[iter]->Write("", TObject::kOverwrite);
   }

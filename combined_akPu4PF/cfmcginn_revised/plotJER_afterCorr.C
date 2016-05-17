@@ -11,7 +11,7 @@
 const Int_t nCentBins = 4;
 const Int_t centBins[nCentBins+1] = {0, 10, 30, 50, 100};
 
-double ptBin[] = {40,50,60,70,80,90,100,110,120,140,160,200};
+double ptBin[] = {40,50,60,70,80,90,100,110,120,140,160,200,260,350};
 const int nPtBins = sizeof(ptBin)/sizeof(ptBin[0]) -1;
 
 TCanvas *C_plot[10];
@@ -31,15 +31,17 @@ void plotfit(std::string jettype, TFile *f_read, std::string his_title)
     le[iCentBins] = new TLegend(0.2,0.75,0.45,0.88);
     le[iCentBins]->SetBorderSize(0);
     le[iCentBins]->AddEntry((TObject*)0,Form("Cent %d-%d %%", centBins[iCentBins], centBins[iCentBins+1]),"");
+    le[iCentBins]->AddEntry((TObject*)0,"|#eta_{jet}|<2.0","");
     h_reCorr[iCentBins]->GetXaxis()->SetTitle("refpt [GeV]");
     double ymax = h_reCorr[iCentBins]->GetMaximum();
     double ymin = h_reCorr[iCentBins]->GetMinimum();
  //   h_reCorr[iCentBins]->SetMaximum( ymax + 0.45*(ymax-ymin) );
  //   h_reCorr[iCentBins]->SetMinimum( ymin - 0.1*(ymax-ymin) );
     h_reCorr[iCentBins]->SetMaximum( 0.4 );
-    h_reCorr[iCentBins]->SetMinimum( 0.08 );
+    h_reCorr[iCentBins]->SetMinimum( 0.06 );
 
-		h_reCorr[iCentBins]->SetTitle(Form("jtRecoPt/GenPt %s",his_title.c_str() ) );
+		h_reCorr[iCentBins]->SetTitle(Form("JER %s",his_title.c_str() ) );
+		h_reCorr[iCentBins]->GetYaxis()->SetTitle("#sigma_{Reco./Gen.} akPu4PF");
     h_reCorr[iCentBins]->Draw();
     le[iCentBins]->Draw();
   }
@@ -60,7 +62,7 @@ void plotJER_afterCorr()
   plotfit("BJERCorr", f_read,"b-jet");
   plotfit("csvBJERCorr", f_read,"csv B-jet");
   plotfit("FCRBJERCorr", f_read,"FCR B-jet");
-  plotfit("FCRcsvBJERCorr", f_read,"FCR csv B-jet");
+//  plotfit("FCRcsvBJERCorr", f_read,"FCR csv B-jet");
 
 
 /*

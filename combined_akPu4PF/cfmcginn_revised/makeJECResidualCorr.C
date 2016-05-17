@@ -43,12 +43,17 @@ void FitResidual1(TH1F* hist_p, TH1F* histPerph_p = NULL)
 
   f1_p->SetParameter(0, par0);
   if(histPerph_p != NULL) f1_p->SetParLimits(0, par0-par0Err, par0+par0Err);
-  else f1_p->SetParLimits(0, .9, 1.05);
+  else f1_p->SetParLimits(0, .9, 1.1);
   f1_p->SetParameter(1, par1);
   f1_p->SetParameter(2, par2);
 
   //hist_p->Fit("f1_p", "WL Q M", "", 30, hist_p->GetXaxis()->GetXmax());
   hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
+  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
+  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
+  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
+  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
+
 
 //	hist_p->Draw(); // j
 
@@ -81,7 +86,8 @@ void makeJECResidualCorr()
   TH1F* BmeanHist_p[nCentBins];
   TH1F* csvBmeanHist_p[nCentBins];
   TH1F* FCRBmeanHist_p[nCentBins];
-  TH1F* FCRcsvBmeanHist_p[nCentBins];
+
+//  TH1F* FCRcsvBmeanHist_p[nCentBins];
 
 //  TH1F* recoToGenHist_p[nCentBins];
 
@@ -90,7 +96,7 @@ void makeJECResidualCorr()
     BmeanHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_B_FitMean_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
     csvBmeanHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_csvB_FitMean_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
     FCRBmeanHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_FCRB_FitMean_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
-    FCRcsvBmeanHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
+//    FCRcsvBmeanHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
 
 
 //    recoToGenHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
@@ -101,7 +107,7 @@ void makeJECResidualCorr()
     FitResidual1(BmeanHist_p[iter]);
     FitResidual1(csvBmeanHist_p[iter]);
     FitResidual1(FCRBmeanHist_p[iter]);
-    FitResidual1(FCRcsvBmeanHist_p[iter]);
+//    FitResidual1(FCRcsvBmeanHist_p[iter]);
 
 //		c_fit->cd(iter-1);
   }
@@ -121,7 +127,7 @@ void makeJECResidualCorr()
     BmeanHist_p[iter]->Write(Form("BresCorr_cent%dto%d_h", centBins[iter], centBins[iter+1]), TObject::kOverwrite);
     csvBmeanHist_p[iter]->Write(Form("csvBresCorr_cent%dto%d_h", centBins[iter], centBins[iter+1]), TObject::kOverwrite);
     FCRBmeanHist_p[iter]->Write(Form("FCRBresCorr_cent%dto%d_h", centBins[iter], centBins[iter+1]), TObject::kOverwrite);
-    FCRcsvBmeanHist_p[iter]->Write(Form("FCRcsvBresCorr_cent%dto%d_h", centBins[iter], centBins[iter+1]), TObject::kOverwrite);
+//    FCRcsvBmeanHist_p[iter]->Write(Form("FCRcsvBresCorr_cent%dto%d_h", centBins[iter], centBins[iter+1]), TObject::kOverwrite);
 
  //   recoToGenHist_p[iter]->Write("", TObject::kOverwrite);
   }
