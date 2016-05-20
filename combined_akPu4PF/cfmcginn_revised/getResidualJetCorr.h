@@ -10,8 +10,8 @@
 
 const std::string residualStr = "RESIDUALCORR";
 
-const Int_t nResCentBins = 4;
-const Int_t resCentBins[nResCentBins+1] = {200, 100, 60, 20, 0};
+const Int_t nResCentBins = 3;
+const Int_t resCentBins[nResCentBins+1] = {200, 60, 20, 0};
 
 TFile* residualJetCorrFile_p;
 
@@ -60,8 +60,8 @@ Bool_t initGetResidualJetCorr(const std::string inResCorrFileName)
     FCRBresidualJetCorrHists_p[iter] = (TH1F*)residualJetCorrFile_p->Get(Form("FCRBresCorr_cent%dto%d_h", resCentBins[iter+1]/2, resCentBins[iter]/2));
     FCRBresidualJetCorrFuncs_p[iter] = (TF1*)FCRBresidualJetCorrHists_p[iter]->GetFunction("f1_p");
 
-    FCRcsvBresidualJetCorrHists_p[iter] = (TH1F*)residualJetCorrFile_p->Get(Form("FCRcsvBresCorr_cent%dto%d_h", resCentBins[iter+1]/2, resCentBins[iter]/2));
-    FCRcsvBresidualJetCorrFuncs_p[iter] = (TF1*)FCRcsvBresidualJetCorrHists_p[iter]->GetFunction("f1_p");
+//    FCRcsvBresidualJetCorrHists_p[iter] = (TH1F*)residualJetCorrFile_p->Get(Form("FCRcsvBresCorr_cent%dto%d_h", resCentBins[iter+1]/2, resCentBins[iter]/2));
+//    FCRcsvBresidualJetCorrFuncs_p[iter] = (TF1*)FCRcsvBresidualJetCorrHists_p[iter]->GetFunction("f1_p");
 
 	
   }

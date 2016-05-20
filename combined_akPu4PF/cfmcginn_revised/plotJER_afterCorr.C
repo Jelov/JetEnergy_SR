@@ -8,8 +8,8 @@
 #include <TLegend.h>
 #include <TGraph.h>
 
-const Int_t nCentBins = 4;
-const Int_t centBins[nCentBins+1] = {0, 10, 30, 50, 100};
+const Int_t nCentBins = 3;
+const Int_t centBins[nCentBins+1] = {0, 10, 30, 100};
 
 double ptBin[] = {40,50,60,70,80,90,100,110,120,140,160,200,260,350};
 const int nPtBins = sizeof(ptBin)/sizeof(ptBin[0]) -1;
@@ -19,8 +19,8 @@ int counter=0;
 
 void plotfit(std::string jettype, TFile *f_read, std::string his_title)
 {
-	C_plot[counter] = new TCanvas(Form("C_plot_%s",jettype.c_str()), Form("C_plot_%s",jettype.c_str()) );
-	C_plot[counter]->Divide(2,2);	
+	C_plot[counter] = new TCanvas(Form("C_plot_%s",jettype.c_str()), Form("C_plot_%s",jettype.c_str()),900,350);
+	C_plot[counter]->Divide(3,1);	
   TH1F* h_reCorr[nCentBins];
   TLegend* le[nCentBins];
 
@@ -40,7 +40,8 @@ void plotfit(std::string jettype, TFile *f_read, std::string his_title)
     h_reCorr[iCentBins]->SetMaximum( 0.4 );
     h_reCorr[iCentBins]->SetMinimum( 0.06 );
 
-		h_reCorr[iCentBins]->SetTitle(Form("JER %s",his_title.c_str() ) );
+//		h_reCorr[iCentBins]->SetTitle(Form("JER %s",his_title.c_str() ) );
+    h_reCorr[iCentBins]->SetTitle("");
 		h_reCorr[iCentBins]->GetYaxis()->SetTitle("#sigma_{Reco./Gen.} akPu4PF");
     h_reCorr[iCentBins]->Draw();
     le[iCentBins]->Draw();

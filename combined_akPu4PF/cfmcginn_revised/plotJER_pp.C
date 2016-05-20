@@ -20,49 +20,52 @@ int counter=0;
 void plotfit(std::string jettype, TFile *f_read, std::string his_title)
 {
 	C_plot[counter] = new TCanvas(Form("C_plot_%s",jettype.c_str()), Form("C_plot_%s",jettype.c_str()) );
-	C_plot[counter]->Divide(3,1);	
+	C_plot[counter]->Divide(1,1);	
   TH1F* h_reCorr[nCentBins];
   TLegend* le[nCentBins];
 
-  for(int iCentBins=0; iCentBins < nCentBins; iCentBins++)
-  {
-    h_reCorr[iCentBins] = (TH1F*)f_read->Get(Form("%s_cent%dto%d_h",jettype.c_str(), centBins[iCentBins], centBins[iCentBins+1]));
+  // for(int iCentBins=0; iCentBins < nCentBins; iCentBins++)
+  // {
+		int iCentBins=0;
+    h_reCorr[iCentBins] = (TH1F*)f_read->Get(Form("%s",jettype.c_str()));
     C_plot[counter]->cd(iCentBins+1);
     le[iCentBins] = new TLegend(0.2,0.75,0.45,0.88);
     le[iCentBins]->SetBorderSize(0);
-    le[iCentBins]->AddEntry((TObject*)0,Form("Cent %d-%d %%", centBins[iCentBins], centBins[iCentBins+1]),"");
-		le[iCentBins]->AddEntry((TObject*)0,"|#eta_{jet}|<2.0","");
+//    le[iCentBins]->AddEntry((TObject*)0,Form("Cent %d-%d %%", centBins[iCentBins], centBins[iCentBins+1]),"");
+    le[iCentBins]->AddEntry((TObject*)0,"|#eta_{jet}|<2.0","");
     h_reCorr[iCentBins]->GetXaxis()->SetTitle("refpt [GeV]");
     double ymax = h_reCorr[iCentBins]->GetMaximum();
     double ymin = h_reCorr[iCentBins]->GetMinimum();
-//    h_reCorr[iCentBins]->SetMaximum( ymax + 0.45*(ymax-ymin) );
-//    h_reCorr[iCentBins]->SetMinimum( ymin - 0.1*(ymax-ymin) );
-    h_reCorr[iCentBins]->SetMaximum( 1.12 );
-    h_reCorr[iCentBins]->SetMinimum( 0.93 );
+ //   h_reCorr[iCentBins]->SetMaximum( ymax + 0.45*(ymax-ymin) );
+ //   h_reCorr[iCentBins]->SetMinimum( ymin - 0.1*(ymax-ymin) );
+    h_reCorr[iCentBins]->SetMaximum( 0.18 );
+    h_reCorr[iCentBins]->SetMinimum( 0.06 );
 
-		h_reCorr[iCentBins]->SetTitle(Form("JES %s",his_title.c_str() ) );
-		h_reCorr[iCentBins]->GetYaxis()->SetTitle("#mu_{Reco./Gen.} akPu4PF");	
+//		h_reCorr[iCentBins]->SetTitle(Form("JER %s",his_title.c_str() ) );
+    h_reCorr[iCentBins]->SetTitle("");
+
+		h_reCorr[iCentBins]->GetYaxis()->SetTitle("#sigma_{Reco./Gen.} akPu4PF");
     h_reCorr[iCentBins]->Draw();
     le[iCentBins]->Draw();
-  }
+  // }
 
-	C_plot[counter]->SaveAs(Form("./fitPlot/fitPtCorr_%s.pdf",his_title.c_str()) );
+	C_plot[counter]->SaveAs(Form("./fitPlot/pp/fitJER_pp_%s.pdf",his_title.c_str()) );
 	counter++;
 	
 }
 
-void plotJECResidualCorr()
+void plotJER_pp()
 {
-	TFile *f_read = new TFile("RESIDUALCORR.root","READ");
-	cout<<"plot the fittting result in file : "<<"RESIDUALCORR.root"<<endl; 
+	TFile *f_read = new TFile("pp_JERfit.root","READ");
+	cout<<"plot the fittting result in file : "<<"pp_JERfit.root"<<endl; 
 	gStyle->SetOptFit(1111);
 	gStyle->SetOptStat(0);
 
-	plotfit("resCorr", f_read, "Inclusice");
-  plotfit("BresCorr", f_read,"b-jet");
-  plotfit("csvBresCorr", f_read,"csv B-jet");
-  plotfit("FCRBresCorr", f_read,"FCR B-jet");
-//  plotfit("FCRcsvBresCorr", f_read,"FCR csv B-jet");
+	plotfit("JER_pp", f_read, "Inclusice");
+  plotfit("BJER_pp", f_read,"b-jet");
+  plotfit("csvBJER_pp", f_read,"csv_B-jet");
+  plotfit("FCRBJER_pp", f_read,"FCR_B-jet");
+//  plotfit("FCRcsvBJERCorr", f_read,"FCR csv B-jet");
 
 
 /*

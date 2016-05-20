@@ -180,7 +180,9 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string selection, 
 	cout<<"mu_title = "<<mu_title<<" selectionC = "<< selectionC<<endl;
 
 	Can_result[counter1] = new TCanvas(Form("Can_result_%i",counter1));
-	mutiGR[counter1] = new TMultiGraph("name",Form("%s",mu_title.c_str()));
+//	mutiGR[counter1] = new TMultiGraph("name",Form("%s",mu_title.c_str()));
+  mutiGR[counter1] = new TMultiGraph(Form("%s",mu_title.c_str()),"");
+
 	TGraphErrors *gr_mean[ngr];
 	legend[counter1] = new TLegend(0.65,0.75,0.85,0.88);
 
@@ -223,7 +225,7 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string selection, 
 	if ( mu_title.compare("JEC Closure") ==0)
 	{
   mutiGR[counter1]->SetMinimum(0.975);
-  mutiGR[counter1]->SetMaximum(1.08);
+  mutiGR[counter1]->SetMaximum(1.06);
 	}
 
 	legend[counter1]->SetBorderSize(0);
@@ -269,6 +271,7 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string selection, 
 
 void JES_closure()
 {
+	int cal_corrjtpt = 0;
 
 	char filename[]="JetESR_result.txt";
 	fstream wout;
@@ -290,10 +293,8 @@ void JES_closure()
 
 	TTree *tc_qcd = (TTree*)f_qcd->Get("nt");
 	TTree *tc_bjt = (TTree*)f_bjt->Get("nt");
-
-	int cal_corrjtpt = 1;
-
-	//	if (cal_corrjtpt == 1){	
+	
+	if (cal_corrjtpt == 1 ){	
 	TFile *f_qcd_JEScorr = new TFile("./JEScorr_root/qcd_JEScorr.root","RECREATE");
 	TTree *t_qcd_JEScorr = new TTree("qcd_JEScorr","qcd jtptcorr");
 
@@ -350,7 +351,8 @@ void JES_closure()
 	f_bjt_JEScorr->cd();
 	t_bjt_JEScorr->Write("",TObject::kOverwrite);
 	f_bjt_JEScorr->Close();
-	//	} // end if (cal_corrjtpt = 1)
+	} // end if (cal_corrjtpt = 1 )
+
 	//
 	tc_qcd->AddFriend("qcd_JEScorr","./JEScorr_root/qcd_JEScorr.root");
 	tc_bjt->AddFriend("bjt_JEScorr","./JEScorr_root/bjt_JEScorr.root");
@@ -375,7 +377,7 @@ void JES_closure()
 	double etaBin[] = {-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2};
 	const int nEtaBins = sizeof(etaBin)/sizeof(etaBin[0])-1;
 
-	int centBin[] = {0,20,60,100,200};
+	int centBin[] = {0,20,60,200};
 	const int nCentBins = sizeof(centBin) / sizeof(centBin[0]) -1;
 
 	//TFile *f_jec = TFile("Jec_akPu4PF","RECREATE");
@@ -415,7 +417,9 @@ void JES_closure()
 
 	std::string measurement="JES_akPu4PF";
 	std::string selection ="Centrality 0-100%";
-	const char *lineKind[]={"Inclusive Jets","bJets","csV>0.9 bJets","FCR bJets"};
+	// const char *lineKind[]={"Inclusive Jets","bJets","csV>0.9 bJets","FCR bJets"};
+  const char *lineKind[]={"Inclusive Jets","bJets","FCR bJets"};
+
 
 
 	TCut Cut_refpt = "refpt>20";
@@ -581,16 +585,24 @@ void JES_closure()
 			double csvLsigmaErr_pt_akPu4PF[nVarBins];
 			//  fit_combine(tc_qcd , Var,fill_type, VarBin , nVarBins, csvL_Allcut , csvLmean_pt_akPu4PF, csvLmeanErr_pt_akPu4PF, csvLsigma_pt_akPu4PF, csvLsigmaErr_pt_akPu4PF);
 
-
+/*
 			double *mean2D_pt_akPu4PF[4]={Imean_pt_akPu4PF , Bmean_pt_akPu4PF,csvBmean_pt_akPu4PF,FCRBmean_pt_akPu4PF};
 			double *meanErr2D_pt_akPu4PF[4]={ImeanErr_pt_akPu4PF, BmeanErr_pt_akPu4PF,csvBmeanErr_pt_akPu4PF,FCRBmeanErr_pt_akPu4PF};
 			double *sigma2D_pt_akPu4PF[4]={Isigma_pt_akPu4PF,Bsigma_pt_akPu4PF,csvBsigma_pt_akPu4PF,FCRBsigma_pt_akPu4PF};
 			double *sigmaErr2D_pt_akPu4PF[4]={IsigmaErr_pt_akPu4PF,BsigmaErr_pt_akPu4PF,csvBsigmaErr_pt_akPu4PF,FCRBsigmaErr_pt_akPu4PF};
+*/
+
+      double *mean2D_pt_akPu4PF[3]={Imean_pt_akPu4PF , Bmean_pt_akPu4PF,FCRBmean_pt_akPu4PF};
+      double *meanErr2D_pt_akPu4PF[3]={ImeanErr_pt_akPu4PF, BmeanErr_pt_akPu4PF,FCRBmeanErr_pt_akPu4PF};
+      double *sigma2D_pt_akPu4PF[3]={Isigma_pt_akPu4PF,Bsigma_pt_akPu4PF,FCRBsigma_pt_akPu4PF};
+      double *sigmaErr2D_pt_akPu4PF[3]={IsigmaErr_pt_akPu4PF,BsigmaErr_pt_akPu4PF,FCRBsigmaErr_pt_akPu4PF};
+
+
 
 			measurement="JEC Closure";
-			Muti_Plot(measurement,fill_type,selection, lineKind , AllCut, Var, 4, nVarBins , VarBin , mean2D_pt_akPu4PF, meanErr2D_pt_akPu4PF);
+			Muti_Plot(measurement,fill_type,selection, lineKind , AllCut, Var, 3, nVarBins , VarBin , mean2D_pt_akPu4PF, meanErr2D_pt_akPu4PF);
 			measurement="JER";
-			Muti_Plot(measurement,fill_type,selection, lineKind , AllCut, Var, 4, nVarBins , VarBin , sigma2D_pt_akPu4PF, sigmaErr2D_pt_akPu4PF);
+			Muti_Plot(measurement,fill_type,selection, lineKind , AllCut, Var, 3, nVarBins , VarBin , sigma2D_pt_akPu4PF, sigmaErr2D_pt_akPu4PF);
 
 
 			// save output to histogram

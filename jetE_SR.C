@@ -245,7 +245,8 @@ void jetE_SR()
 	double etaBin[] = {-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,2};
 	const int nEtaBins = sizeof(etaBin)/sizeof(etaBin[0])-1;
 
-	double centBin[] = {0,20,60,100,200};
+//	double centBin[] = {0,20,60,100,200};
+	double centBin[] = {0,20,60,200};
 	const int nCentBins = sizeof(centBin) / sizeof(centBin[0]) -1;
 
 	double centBin1[nCentBins+1];

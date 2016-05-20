@@ -12,8 +12,8 @@
 const std::string resString1 = "RESIDUALHIST.root";
 const std::string resString2 = "RESIDUAL2HIST.root";
 
-const Int_t nCentBins = 4;
-const Int_t centBins[nCentBins+1] = {0, 10, 30, 50, 100};
+const Int_t nCentBins = 3;
+const Int_t centBins[nCentBins+1] = {0, 10, 30, 100};
 
 //TCanvas *c_fit = new TCanvas("c_fit","c_fit");
 
