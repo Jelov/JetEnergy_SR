@@ -23,17 +23,18 @@ void pthat_weight(){
 	double pthatlow =0;
 	double pthathi =200;
 
-	TH1D *h_pthat_bjt = new TH1D("h_pthat_bjt","bjet",200,0,400);
-	TH1D *h_pthat_qcd = new TH1D("h_pthat_qcd","qcd",200,0,400);
+	TH1D *h_pthat_bjt = new TH1D("h_pthat_bjt","bjet",200,0,400); h_pthat_bjt->Sumw2();
+	TH1D *h_pthat_qcd = new TH1D("h_pthat_qcd","qcd",200,0,400); h_pthat_qcd->Sumw2();
 
-  TH1D *h_pthat_bjtW = new TH1D("h_pthat_bjtW","bjet* weight",200,0,400);
-  TH1D *h_pthat_qcdW = new TH1D("h_pthat_qcdW","qcd*weight",200,0,400);
+  TH1D *h_pthat_bjtW = new TH1D("h_pthat_bjtW","bjet* weight",200,0,400); h_pthat_bjtW->Sumw2();
+  TH1D *h_pthat_qcdW = new TH1D("h_pthat_qcdW","qcd*weight",200,0,400); h_pthat_qcdW->Sumw2();
 
-  TH1D *h_pthat30_bjt = new TH1D("h_pthat30_bjt","bjet_pthat30",200,0,400);
-  TH1D *h_pthat30_qcd = new TH1D("h_pthat30_qcd","qcd_pthat30",200,0,400);	
+  TH1D *h_pthat30_bjt = new TH1D("h_pthat30_bjt","bjet_pthat30",200,0,400); h_pthat30_bjt->Sumw2();
+  TH1D *h_pthat30_qcd = new TH1D("h_pthat30_qcd","qcd_pthat30",200,0,400);	h_pthat30_qcd->Sumw2();
 
-	TH1D *h_pthat_bjtR = new TH1D("h_pthat_bjtR","bjtW/pthat30",200,0,400);
-	TH1D *h_pthat_qcdR = new TH1D("h_pthat_qcdR","qcdW/pthat30",200,0,400);;
+	TH1D *h_pthat_bjtR = new TH1D("h_pthat_bjtR","bjtW/pthat30",200,0,400); h_pthat_bjtR->Sumw2();
+	TH1D *h_pthat_qcdR = new TH1D("h_pthat_qcdR","qcdW/pthat30",200,0,400);	h_pthat_qcdR->Sumw2();
+
 
 	TCanvas *c_pthat = new TCanvas("c_pthat","c_pthat");
 	c_pthat->Divide(2,2);

@@ -291,8 +291,12 @@ void jetE_SR()
 	double etaBin[] = {-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2};
 	const int nEtaBins = sizeof(etaBin)/sizeof(etaBin[0])-1;
 
+	double absEtaBin[] = {0,1.5,2};
+	const int nabsEtaBins = sizeof(absEtaBin)/sizeof(absEtaBin[0])-1;
+
 //	int centBin[] = {0,20,60,100,200};
-	int centBin[] = {0,20,60,200};
+//	int centBin[] = {0,20,60,200};
+	int centBin[]= {0,10,20,30,40,60,200};
 	const int nCentBins = sizeof(centBin) / sizeof(centBin[0]) -1;
 
 	//TFile *f_jec = TFile("Jec_akPu4PF","RECREATE");
@@ -323,13 +327,17 @@ void jetE_SR()
 	std::string Var=Var_refpt;
 	std::string fill_type = "ratio"; //ratio or residue
 	//std::string fill_type = "residue"; //ratio or residue
-	// const char *Var_array[]={"refpt","jtpt"};
-	const char *Var_array[]={"jteta"};
-	
+	const char *Var_array[]={"refpt","jtpt"};
+//	const char *Var_array[]={"jteta"};
+	const char *eta_aray[]={"barrel","endcap"};
+
+		
 	std::string measurement="JES_akPu4PF";
 	std::string selection ="Centrality 0-100%";
+	std::string eta_selection="|#eta_{jet}|<2.0";
 //	const char *lineKind[]={"Inclusive Jets","bJets","csV>0.9 bJets","FCR bJets","FCR csV>0.9 bJets"};
   const char *lineKind[]={"Inclusive Jets","bJets","FCR bJets","FCR csV>0.9 bJets"};
+
 
 
 	TCut Cut_refpt = "refpt>50";
@@ -387,12 +395,17 @@ void jetE_SR()
 		// double hf_ymax =5;
 		// double hf_ymin =0;
 
+		for(int iabsEtaBins = 0 ; iabsEtaBins<nabsEtaBins; iabsEtaBins++)
+		{
+
 		for(int icentBin =0; icentBin <nCentBins ; icentBin++)
 			//		for(int icentBin =1; icentBin <2; icentBin++)	
 		{
 			TCut CentBinCut = Form("bin>=%d && bin<=%d",centBin[icentBin],centBin[icentBin+1]);	
 			selection =Form("Centrality %i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2);
-
+			TCut absEtaBinCut = Form("abs(jteta)>=%f && abs(jteta)<%f",absEtaBin[iabsEtaBins],absEtaBin[iabsEtaBins]);
+			eta_selection = Form("%f<|#eta_{jet}|<%f",absEtaBin[iabsEtaBins],absEtaBin[iabsEtaBins]);	
+	
 			AllCut = tempAllCut && CentBinCut;
 			B_AllCut = B_Cut && AllCut;
 			csvB_AllCut = csvtag && B_AllCut;
@@ -565,6 +578,7 @@ void jetE_SR()
 			}
 
 		}// end for(icentBin)
+	} // end for(iabsEtaBins)
 	}// end   for (int iVartype = 0 ; iVartype <2; iVartype++{
 
 	// write histogram into output files
