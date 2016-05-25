@@ -28,7 +28,6 @@
 
 // Global objects
 
-// hello git
 int counter;
 int counter1;
 TCanvas *Can_Temp[200];
@@ -118,7 +117,7 @@ void fit_combine(TChain *tc, std::string Var,std::string filltype, const double 
 
 		if (f_Ratio[ibin]->GetProb() < .01){cout<<"f1_Ratio[ibin]->GetProb() <0.01"<<endl;}
 
-		if(f_Ratio[ibin]->GetParError(1) > 0.05 || f_Ratio[ibin]->GetProb() < .001){
+		if(f_Ratio[ibin]->GetParError(1) > 0.05 || f_Ratio[ibin]->GetProb() < .002){
 			f_Ratio[ibin] = new TF1(Form("f_Ratio_%d",ibin), "gaus",mean_temp-2*rms_temp,mean_temp+2*rms_temp );
 			f_Ratio[ibin]->SetParameter(1,h_Ratio[ibin]->GetMean());
 			f_Ratio[ibin]->SetParameter(2,h_Ratio[ibin]->GetRMS()) ; 	
@@ -286,7 +285,9 @@ void jetE_SR()
 	//	t_temp = tc_akPu4PF;
 
 
+//	double ptBin[] = {40,50,60,70,80,90,100,110,120,140,160,200,260,350};
 	double ptBin[] = {40,50,60,70,80,90,100,110,120,140,160,200,260,350};
+
 	//	double ptBin[] ={60,70,80,90,100,110,120,140,160,200};
 	const int nPtBins = sizeof(ptBin)/sizeof(ptBin[0]) -1;
 
