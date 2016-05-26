@@ -8,45 +8,71 @@
 #include <TLegend.h>
 #include <TGraph.h>
 
-const Int_t nCentBins = 3;
-const Int_t centBins[nCentBins+1] = {0, 10, 30, 100};
+//const Int_t nCentBins = 3;
+//const Int_t centBins[nCentBins+1] = {0, 10, 30, 100};
 
-double ptBin[] = {40,50,60,70,80,90,100,110,120,140,160,200,260,350};
+const Int_t nCentBins = 8;
+const  int centBins[nCentBins+1]= {0,5,10,15,20,30,50,70,100};
+
+double ptBin[] = {20,30,40,50,60,70,80,90,100,110,120,140,160,200,250,310,400,600};
+//double ptBin[] = {40,50,60,70,80,90,100,110,120,140,160,200,260,350};
 const int nPtBins = sizeof(ptBin)/sizeof(ptBin[0]) -1;
 
-TCanvas *C_plot[10];
+const Int_t nabsEtaBins = 2;
+const Double_t absEtaBin[nabsEtaBins+1] = {0,1.5,2};
+
+
+
+TCanvas *C_plot[2][10];
+// TCanvas *C_plot1[10]
 int counter=0;
 
 void plotfit(std::string jettype, TFile *f_read, std::string his_title)
 {
-	C_plot[counter] = new TCanvas(Form("C_plot_%s",jettype.c_str()), Form("C_plot_%s",jettype.c_str()) );
-	C_plot[counter]->Divide(3,1);	
-  TH1F* h_reCorr[nCentBins];
-  TLegend* le[nCentBins];
+	
+  const char* EtaRangeArr[] ={"eta0to15","eta15to20"};
+  std::string EtaRange = "eta0to15";
+
+  TH1F* h_reCorr[nabsEtaBins][nCentBins];
+  TLegend* le[nabsEtaBins][nCentBins];
+
+
+	for(Int_t iabsEtaBins =0; iabsEtaBins<nabsEtaBins;iabsEtaBins++){
+	    EtaRange = EtaRangeArr[iabsEtaBins];
+
+
+  C_plot[iabsEtaBins][counter] = new TCanvas(Form("C_plot_%s_%s",jettype.c_str(),EtaRange.c_str()), Form("C_plot_%s_%s",jettype.c_str(),EtaRange.c_str()) );
+  C_plot[iabsEtaBins][counter]->Divide(4,2);
+
 
   for(int iCentBins=0; iCentBins < nCentBins; iCentBins++)
   {
-    h_reCorr[iCentBins] = (TH1F*)f_read->Get(Form("%s_cent%dto%d_h",jettype.c_str(), centBins[iCentBins], centBins[iCentBins+1]));
-    C_plot[counter]->cd(iCentBins+1);
-    le[iCentBins] = new TLegend(0.2,0.75,0.45,0.88);
-    le[iCentBins]->SetBorderSize(0);
-    le[iCentBins]->AddEntry((TObject*)0,Form("Cent %d-%d %%", centBins[iCentBins], centBins[iCentBins+1]),"");
-		le[iCentBins]->AddEntry((TObject*)0,"|#eta_{jet}|<2.0","");
-    h_reCorr[iCentBins]->GetXaxis()->SetTitle("refpt [GeV]");
-    double ymax = h_reCorr[iCentBins]->GetMaximum();
-    double ymin = h_reCorr[iCentBins]->GetMinimum();
-//    h_reCorr[iCentBins]->SetMaximum( ymax + 0.45*(ymax-ymin) );
-//    h_reCorr[iCentBins]->SetMinimum( ymin - 0.1*(ymax-ymin) );
-    h_reCorr[iCentBins]->SetMaximum( 1.12 );
-    h_reCorr[iCentBins]->SetMinimum( 0.93 );
+    h_reCorr[iabsEtaBins][iCentBins] = (TH1F*)f_read->Get(Form("%s_cent%dto%d_%s",jettype.c_str(), centBins[iCentBins], centBins[iCentBins+1],EtaRange.c_str()));
+    C_plot[iabsEtaBins][counter]->cd(iCentBins+1);
+    le[iabsEtaBins][iCentBins] = new TLegend(0.2,0.75,0.45,0.88);
+    le[iabsEtaBins][iCentBins]->SetBorderSize(0);
+    le[iabsEtaBins][iCentBins]->AddEntry((TObject*)0,Form("Cent %d-%d %%", centBins[iCentBins], centBins[iCentBins+1]),"");
+//		le[iabsEtaBins][iCentBins]->AddEntry((TObject*)0,"|#eta_{jet}|<2.0","");
+			if(iabsEtaBins==0){le[iabsEtaBins][iCentBins]->AddEntry((TObject*)0,"0<|#eta_{jet}|<1.5","");}
+      if(iabsEtaBins==1){le[iabsEtaBins][iCentBins]->AddEntry((TObject*)0,"1.5<|#eta_{jet}|<2","");}
 
-		h_reCorr[iCentBins]->SetTitle(Form("JES %s",his_title.c_str() ) );
-		h_reCorr[iCentBins]->GetYaxis()->SetTitle("#mu_{Reco./Gen.} akPu4PF");	
-    h_reCorr[iCentBins]->Draw();
-    le[iCentBins]->Draw();
+    h_reCorr[iabsEtaBins][iCentBins]->GetXaxis()->SetTitle("genJet p_{T} (GeV)");
+    double ymax = h_reCorr[iabsEtaBins][iCentBins]->GetMaximum();
+    double ymin = h_reCorr[iabsEtaBins][iCentBins]->GetMinimum();
+    h_reCorr[iabsEtaBins][iCentBins]->SetMaximum( ymax + 0.45*(ymax-ymin) );
+    h_reCorr[iabsEtaBins][iCentBins]->SetMinimum( ymin - 0.1*(ymax-ymin) );
+//    h_reCorr[iabsEtaBins][iCentBins]->SetMaximum( 1.12 );
+//    h_reCorr[iabsEtaBins][iCentBins]->SetMinimum( 0.93 );
+
+		h_reCorr[iabsEtaBins][iCentBins]->SetTitle(Form("JES %s",his_title.c_str() ) );
+		h_reCorr[iabsEtaBins][iCentBins]->GetYaxis()->SetTitle("#mu_{Reco./Gen.} akPu4PF");	
+    h_reCorr[iabsEtaBins][iCentBins]->Draw();
+    le[iabsEtaBins][iCentBins]->Draw();
   }
+  C_plot[iabsEtaBins][counter]->SaveAs(Form("./fitPlot/fitPtCorr_%s_%s.pdf",his_title.c_str(),EtaRange.c_str()) );
 
-	C_plot[counter]->SaveAs(Form("./fitPlot/fitPtCorr_%s.pdf",his_title.c_str()) );
+	}// end for iabsEta bin
+
 	counter++;
 	
 }
@@ -58,7 +84,7 @@ void plotJECResidualCorr()
 	gStyle->SetOptFit(1111);
 	gStyle->SetOptStat(0);
 
-	plotfit("resCorr", f_read, "Inclusice");
+	plotfit("IresCorr", f_read, "Inclusice");
   plotfit("BresCorr", f_read,"b-jet");
   plotfit("csvBresCorr", f_read,"csv B-jet");
   plotfit("FCRBresCorr", f_read,"FCR B-jet");
