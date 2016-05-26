@@ -271,7 +271,7 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string selection, 
 
 void JES_closure()
 {
-	int cal_corrjtpt = 0;
+	int cal_corrjtpt = 1;
 
 	char filename[]="JetESR_result.txt";
 	fstream wout;
@@ -301,13 +301,15 @@ void JES_closure()
 	TFile *f_bjt_JEScorr = new TFile("./JEScorr_root/bjt_JEScorr.root","RECREATE");
 	TTree *t_bjt_JEScorr = new TTree("bjt_JEScorr","bjt jtptcorr");
 
-	float bin_qcd, jtpt_qcd;
-	float bin_bjt, jtpt_bjt;
+	float bin_qcd, jtpt_qcd, jteta_qcd;
+	float bin_bjt, jtpt_bjt, jteta_bjt;
 
 	tc_qcd->SetBranchAddress("bin", &bin_qcd );
 	tc_qcd->SetBranchAddress("jtpt", &jtpt_qcd);
-	tc_bjt->SetBranchAddress("bin", &bin_qcd);
-	tc_bjt->SetBranchAddress("jtpt", &jtpt_qcd);
+	tc_qcd->SetBranchAddress("jteta",&jteta_qcd);
+	tc_bjt->SetBranchAddress("bin", &bin_bjt);
+	tc_bjt->SetBranchAddress("jtpt", &jtpt_bjt);
+	tc_bjt->SetBranchAddress("jteta", &jteta_bjt);
 
 	float jtptcorr_qcd;
 	float jtptcorr_B;
