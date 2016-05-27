@@ -46,7 +46,9 @@ void fit_combine(TTree *tc, std::string Var,std::string filltype, const double *
 	Can_Temp[counter] = new TCanvas(Form("Can_Temp_%i",counter));
 	if(nVarBins<=9){Can_Temp[counter]->Divide(3,3);}
 	else if(nVarBins<=12){Can_Temp[counter]->Divide(3,4);}
-	else {Can_Temp[counter]->Divide(4,4);}
+  else if(nVarBins<=16) {Can_Temp[counter]->Divide(4,4);}
+  else {Can_Temp[counter]->Divide(5,4);}
+
 
 
 
@@ -67,6 +69,8 @@ void fit_combine(TTree *tc, std::string Var,std::string filltype, const double *
 		Can_Temp[counter]->cd(ibin+1);
 		double VarMin = VarBins_array[ibin];
 		double VarMax = VarBins_array[ibin+1];
+    int fit_histo =0;
+//    if( Var.compare("refpt")==0 && (VarMax<=40 || VarMin >=400) ){fit_histo=0;} 
 
 		h_Ratio[ibin] = new TH1D( Form("h_Ratio[%d]",ibin),Form("%s_%s_%i_%i",jetTitle.c_str(),Var.c_str(),(int)VarMin,(int)VarMax) ,nRatiobins,minRatio,maxRatio);  // h_Ration_%d ??
 		h_Ratio[ibin]->Sumw2();
@@ -94,6 +98,7 @@ void fit_combine(TTree *tc, std::string Var,std::string filltype, const double *
 
 		h_Ratio[ibin]->GetXaxis()->SetTitle(Form("%s, jtpt/refpt",Gcut.GetTitle()));
 
+		if (fit_histo==1){
 		if (filltype.compare("ratio")==0){
 			f_Ratio[ibin] = new TF1(Form("f_Ratio_%d",ibin), "gaus",mean_temp-3*rms_temp,mean_temp+3*rms_temp );}
 		if (filltype.compare("residue")==0){
@@ -154,6 +159,29 @@ void fit_combine(TTree *tc, std::string Var,std::string filltype, const double *
 		sigma[ibin] = f_Ratio[ibin]->GetParameter(2);
 		sigmaErr[ibin] = f_Ratio[ibin]->GetParError(2);
 
+    if(mean[ibin] >=2 || meanErr[ibin] >=2){ // prevent bad value from fit
+    mean[ibin]=h_Ratio[ibin]->GetMean();
+    meanErr[ibin] = h_Ratio[ibin]->GetMeanError();
+    sigma[ibin]=h_Ratio[ibin]->GetRMS();
+    sigmaErr[ibin] =h_Ratio[ibin]->GetRMSError();
+
+    }
+
+
+		}// end if fit_histo ==1
+
+  else if(fit_histo == 0){
+    mean[ibin]=h_Ratio[ibin]->GetMean();
+    meanErr[ibin] = h_Ratio[ibin]->GetMeanError();
+    sigma[ibin]=h_Ratio[ibin]->GetRMS();
+    sigmaErr[ibin] =h_Ratio[ibin]->GetRMSError();
+
+
+  }
+
+	
+
+
 	} // end   for(int ibin =0; ibin<nVarBins; ibin++)
 
 	Can_Temp[counter]->SaveAs(Form("./Plots/%s/fitPlots/fit_%s_%s_%s.pdf",Var.c_str(),Var.c_str(),jetTitle.c_str(),Gcut.GetTitle() ));
@@ -161,7 +189,7 @@ void fit_combine(TTree *tc, std::string Var,std::string filltype, const double *
 	counter++; 
 }
 
-void Muti_Plot(std::string mu_title,std::string filltype,std::string selection,  const char **lineKind_Arr, TCut selectionC , std::string Var , const int ngr, const int nVarBins, double * VarBins_array , double **yArr2, double **yErrArr2)
+void Muti_Plot(std::string mu_title,std::string filltype,std::string etaselection,std::string selection,  const char **lineKind_Arr, TCut selectionC , std::string Var , const int ngr, const int nVarBins, double * VarBins_array , double **yArr2, double **yErrArr2)
 { 
 
 	char filename[]="JetESR_status.txt";
@@ -222,12 +250,14 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string selection, 
 	gPad->Modified();
 	mutiGR[counter1]->SetMinimum(mutiGRYmin-ydiff*0.2);
 	mutiGR[counter1]->SetMaximum(mutiGRYmax+ydiff*0.45);
+
+/*
 	if ( mu_title.compare("JEC Closure") ==0)
 	{
   mutiGR[counter1]->SetMinimum(0.975);
   mutiGR[counter1]->SetMaximum(1.06);
 	}
-
+*/
 	legend[counter1]->SetBorderSize(0);
 	/*
 		 TProfile *hf_qcd;
@@ -252,7 +282,8 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string selection, 
 	legend1->AddEntry((TObject*)0,selection.c_str(),"");
 	cout<<"Var = "<<Var<<endl;
 	if (Var.compare("jteta") == 0){ legend1->AddEntry((TObject*)0,"refpt>50","");}
-	if (Var.compare("refpt") == 0){ legend1->AddEntry((TObject*)0,"|#eta_{jet}|<2.0","");}
+//	if (Var.compare("refpt") == 0){ legend1->AddEntry((TObject*)0,"|#eta_{jet}|<2.0","");}
+  if (Var.compare("refpt") == 0){ legend1->AddEntry((TObject*)0,etaselection.c_str(),"");}
 	legend1->SetBorderSize(0);
 	legend1->Draw();
 
@@ -334,7 +365,7 @@ void JES_closure()
 	for(int ientry = 0; ientry<qcd_nentries; ientry++)
 	{
 		tc_qcd->GetEntry(ientry);
-		jtptcorr_qcd=getResCorrJetPt(jtpt_qcd,(int)bin_qcd,0);
+		jtptcorr_qcd=getResCorrJetPt(jtpt_qcd,(int)bin_qcd,jteta_qcd,0);
 		t_qcd_JEScorr->Fill();		
 	}
 	f_qcd_JEScorr->cd();
@@ -344,9 +375,9 @@ void JES_closure()
 	for (int ientry = 0; ientry<bjt_nentries; ientry++)
 	{
 		tc_bjt->GetEntry(ientry);
-		jtptcorr_B=getResCorrJetPt(jtpt_qcd,(int)bin_qcd,1);
-		jtptcorr_csvB=getResCorrJetPt(jtpt_qcd,(int)bin_qcd,2);
-		jtptcorr_FCRB=getResCorrJetPt(jtpt_qcd,(int)bin_qcd,3);
+		jtptcorr_B=getResCorrJetPt(jtpt_qcd,(int)bin_qcd,jteta_bjt,1);
+		jtptcorr_csvB=getResCorrJetPt(jtpt_qcd,(int)bin_qcd,jteta_bjt,2);
+		jtptcorr_FCRB=getResCorrJetPt(jtpt_qcd,(int)bin_qcd,jteta_bjt,3);
 //		jtptcorr_FCRcsvB=getResCorrJetPt(jtpt_qcd,(int)bin_qcd,4);
 		t_bjt_JEScorr->Fill();
 	}
@@ -372,17 +403,23 @@ void JES_closure()
 	//	t_temp = tc_akPu4PF;
 
 
-	double ptBin[] = {40,50,60,70,80,90,100,110,120,140,160,200,260,350};
+//	double ptBin[] = {40,50,60,70,80,90,100,110,120,140,160,200,260,350};
 	//	double ptBin[] ={60,70,80,90,100,110,120,140,160,200};
+  double ptBin[] = {20,30,40,50,60,70,80,90,100,110,120,140,160,200,250,310,400,600};
 	const int nPtBins = sizeof(ptBin)/sizeof(ptBin[0]) -1;
 
 	double etaBin[] = {-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2};
 	const int nEtaBins = sizeof(etaBin)/sizeof(etaBin[0])-1;
 
-	int centBin[] = {0,20,60,200};
+  double absEtaBin[] = {0,1.5,2};
+  const int nabsEtaBins = sizeof(absEtaBin)/sizeof(absEtaBin[0])-1;
+
+  int centBin[]= {0,10,20,30,40,60,100,140,200};
+//	int centBin[] = {0,20,60,200};
 	const int nCentBins = sizeof(centBin) / sizeof(centBin[0]) -1;
 
 	//TFile *f_jec = TFile("Jec_akPu4PF","RECREATE");
+/*
 	TH1F* jtRecoOverGenVPt_Inc_FitMean_akPu4PF[nCentBins];
 	TH1F* jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF[nCentBins];
 	TH1F* jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[nCentBins];
@@ -398,6 +435,30 @@ void JES_closure()
 	TH1F* jtRecoOverGenVPt_FCRB_FitMean_akPu4PF[nCentBins];
 	TH1F* jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF[nCentBins];
 	TH1F* jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[nCentBins];
+*/
+  TH1F* jtRecoOverGenVPt_Inc_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[nabsEtaBins][nCentBins];
+
+  TH1F* jtRecoOverGenVPt_B_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVRecoPt_B_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVPt_B_FitSigma_akPu4PF[nabsEtaBins][nCentBins];
+
+  TH1F* jtRecoOverGenVPt_csvB_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[nabsEtaBins][nCentBins];
+
+  TH1F* jtRecoOverGenVPt_FCRB_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[nabsEtaBins][nCentBins];
+
+
+  TH1F* jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF[nabsEtaBins][nCentBins];
+
+
+// continue work here 201605261800
 
 //	TH1F* jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[nCentBins];
 //	TH1F* jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF[nCentBins];
@@ -421,7 +482,8 @@ void JES_closure()
 	std::string selection ="Centrality 0-100%";
 	// const char *lineKind[]={"Inclusive Jets","bJets","csV>0.9 bJets","FCR bJets"};
   const char *lineKind[]={"Inclusive Jets","bJets","FCR bJets"};
-
+  std::string eta_selection="|#eta_{jet}|<2.0";
+	const char *eta_selectionArr[]={"0<|#eta_{jet}|<1.5","1.5|#eta_{jet}|<2.0"};
 
 
 	TCut Cut_refpt = "refpt>20";
@@ -479,13 +541,19 @@ void JES_closure()
 		// double hf_ymax =5;
 		// double hf_ymin =0;
 
+    for(int iabsEtaBins = 0 ; iabsEtaBins<nabsEtaBins; iabsEtaBins++)
+    {
+			eta_selection = eta_selectionArr[iabsEtaBins];
+      TCut absEtaBinCut = Form("abs(jteta)>=%f && abs(jteta)<%f",absEtaBin[iabsEtaBins],absEtaBin[iabsEtaBins+1]);
+
+
 		for(int icentBin =0; icentBin <nCentBins ; icentBin++)
 			//		for(int icentBin =1; icentBin <2; icentBin++)	
 		{
 			TCut CentBinCut = Form("bin>=%d && bin<=%d",centBin[icentBin],centBin[icentBin+1]);	
 			selection =Form("Centrality %i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2);
 
-			AllCut = tempAllCut && CentBinCut;
+			AllCut = tempAllCut && CentBinCut &&absEtaBinCut;
 			B_AllCut = B_Cut && AllCut;
 			csvB_AllCut = csvtag && B_AllCut;
 			csvL_Allcut = csvtag && Light_Cut && AllCut;	
@@ -602,125 +670,152 @@ void JES_closure()
 
 
 			measurement="JEC Closure";
-			Muti_Plot(measurement,fill_type,selection, lineKind , AllCut, Var, 3, nVarBins , VarBin , mean2D_pt_akPu4PF, meanErr2D_pt_akPu4PF);
+			Muti_Plot(measurement,fill_type,eta_selection,selection, lineKind , AllCut, Var, 3, nVarBins , VarBin , mean2D_pt_akPu4PF, meanErr2D_pt_akPu4PF);
 			measurement="JER";
-			Muti_Plot(measurement,fill_type,selection, lineKind , AllCut, Var, 3, nVarBins , VarBin , sigma2D_pt_akPu4PF, sigmaErr2D_pt_akPu4PF);
+			Muti_Plot(measurement,fill_type,eta_selection,selection, lineKind , AllCut, Var, 3, nVarBins , VarBin , sigma2D_pt_akPu4PF, sigmaErr2D_pt_akPu4PF);
 
 
 			// save output to histogram
 			if(Var.compare(Var_refpt)==0) {
-				jtRecoOverGenVPt_Inc_FitMean_akPu4PF[icentBin]= new TH1F(Form("jtRecoOverGenVPt_Inc_FitMean_akPu4PF_%i",icentBin),Form("jtRecoOverGenVPt_Inc_FitMean_akPu4PF_%i",icentBin),nVarBins,VarBin )	;
-				jtRecoOverGenVPt_B_FitMean_akPu4PF[icentBin]= new TH1F(Form("jtRecoOverGenVPt_B_FitMean_akPu4PF_%i",icentBin),Form("jtRecoOverGenVPt_Inc_FitMean_akPu4PF_%i",icentBin),nVarBins,VarBin )  ;
-				jtRecoOverGenVPt_csvB_FitMean_akPu4PF[icentBin]= new TH1F(Form("jtRecoOverGenVPt_csvB_FitMean_akPu4PF_%i",icentBin),Form("jtRecoOverGenVPt_Inc_FitMean_akPu4PF_%i",icentBin),nVarBins,VarBin )  ;
-				jtRecoOverGenVPt_FCRB_FitMean_akPu4PF[icentBin]= new TH1F(Form("jtRecoOverGenVPt_FCRB_FitMean_akPu4PF_%i",icentBin),Form("jtRecoOverGenVPt_Inc_FitMean_akPu4PF_%i",icentBin),nVarBins,VarBin )  ;
-//				jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[icentBin]= new TH1F(Form("jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF_%i",icentBin),Form("jtRecoOverGenVPt_Inc_FitMean_akPu4PF_%i",icentBin),nVarBins,VarBin )  ;
+        jtRecoOverGenVPt_Inc_FitMean_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_Inc_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_Inc_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+        jtRecoOverGenVPt_B_FitMean_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_B_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_B_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+        jtRecoOverGenVPt_csvB_FitMean_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_csvB_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_csvB_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+        jtRecoOverGenVPt_FCRB_FitMean_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_FCRB_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_FCRB_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+        jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
 
-				jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[icentBin]= new TH1F(Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_%i",icentBin),Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_%i",icentBin),nVarBins,VarBin )  ;
-				jtRecoOverGenVPt_B_FitSigma_akPu4PF[icentBin]= new TH1F(Form("jtRecoOverGenVPt_B_FitSigma_akPu4PF_%i",icentBin),Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_%i",icentBin),nVarBins,VarBin )  ;
-				jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[icentBin]= new TH1F(Form("jtRecoOverGenVPt_csvB_FitSigma_akPu4PF_%i",icentBin),Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_%i",icentBin),nVarBins,VarBin )  ;
-				jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[icentBin]= new TH1F(Form("jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF_%i",icentBin),Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_%i",icentBin),nVarBins,VarBin )  ;
-//				jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF[icentBin]= new TH1F(Form("jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF_%i",icentBin),Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_%i",icentBin),nVarBins,VarBin )  ;
+//				jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin]= new TH1F(Form("jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF_%i",icentBin),Form("jtRecoOverGenVPt_Inc_FitMean_akPu4PF_%i",icentBin),nVarBins,VarBin )  ;
+
+        jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+        jtRecoOverGenVPt_B_FitSigma_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_B_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_B_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+        jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_csvB_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_csvB_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+        jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+        jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+
+
+
+
+//////////
+//				jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF[iabsEtaBins][icentBin]= new TH1F(Form("jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF_%i",icentBin),Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_%i",icentBin),nVarBins,VarBin )  ;
 
 
 			}
 			if(Var.compare(Var_jtpt)==0) {
-				jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF_%i",icentBin),nVarBins,VarBin);
-				jtRecoOverGenVRecoPt_B_FitMean_akPu4PF[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_B_FitMean_akPu4PF_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF_%i",icentBin),nVarBins,VarBin);
-				jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF_%i",icentBin),nVarBins,VarBin);
-				jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF_%i",icentBin),nVarBins,VarBin);
-//				jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF_%i",icentBin),nVarBins,VarBin);
+        jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+        jtRecoOverGenVRecoPt_B_FitMean_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_B_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVRecoPt_B_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+        jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+        jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+
+//				jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF_%i",icentBin),nVarBins,VarBin);
 
 			}
 
 			for(int iVarBins = 0; iVarBins < nVarBins; iVarBins++){
 				if(Var.compare(Var_refpt)==0) {
-					jtRecoOverGenVPt_Inc_FitMean_akPu4PF[icentBin]->SetBinContent(iVarBins+1, Imean_pt_akPu4PF[iVarBins]);
-					jtRecoOverGenVPt_Inc_FitMean_akPu4PF[icentBin]->SetBinError(iVarBins+1, ImeanErr_pt_akPu4PF[iVarBins]);
+///
+          jtRecoOverGenVPt_Inc_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, Imean_pt_akPu4PF[iVarBins]);
+          jtRecoOverGenVPt_Inc_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, ImeanErr_pt_akPu4PF[iVarBins]);
 
-					jtRecoOverGenVPt_B_FitMean_akPu4PF[icentBin]->SetBinContent(iVarBins+1, Bmean_pt_akPu4PF[iVarBins]);
-					jtRecoOverGenVPt_B_FitMean_akPu4PF[icentBin]->SetBinError(iVarBins+1, BmeanErr_pt_akPu4PF[iVarBins]);
+          jtRecoOverGenVPt_B_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, Bmean_pt_akPu4PF[iVarBins]);
+          jtRecoOverGenVPt_B_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, BmeanErr_pt_akPu4PF[iVarBins]);
 
-					jtRecoOverGenVPt_csvB_FitMean_akPu4PF[icentBin]->SetBinContent(iVarBins+1, csvBmean_pt_akPu4PF[iVarBins]);
-					jtRecoOverGenVPt_csvB_FitMean_akPu4PF[icentBin]->SetBinError(iVarBins+1, csvBmeanErr_pt_akPu4PF[iVarBins]);
+         jtRecoOverGenVPt_csvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, csvBmean_pt_akPu4PF[iVarBins]);
+          jtRecoOverGenVPt_csvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, csvBmeanErr_pt_akPu4PF[iVarBins]);
 
-					jtRecoOverGenVPt_FCRB_FitMean_akPu4PF[icentBin]->SetBinContent(iVarBins+1, FCRBmean_pt_akPu4PF[iVarBins]);
-					jtRecoOverGenVPt_FCRB_FitMean_akPu4PF[icentBin]->SetBinError(iVarBins+1, FCRBmeanErr_pt_akPu4PF[iVarBins]);
+         jtRecoOverGenVPt_FCRB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, FCRBmean_pt_akPu4PF[iVarBins]);
+          jtRecoOverGenVPt_FCRB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, FCRBmeanErr_pt_akPu4PF[iVarBins]);
 
-//					jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[icentBin]->SetBinContent(iVarBins+1, FCRcsvBmean_pt_akPu4PF[iVarBins]);
-//					jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[icentBin]->SetBinError(iVarBins+1, FCRcsvBmeanErr_pt_akPu4PF[iVarBins]);
+         jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, FCRcsvBmean_pt_akPu4PF[iVarBins]);
+          jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, FCRcsvBmeanErr_pt_akPu4PF[iVarBins]);
 
-          jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[icentBin]->SetBinContent(iVarBins+1, Isigma_pt_akPu4PF[iVarBins]);
-          jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[icentBin]->SetBinError(iVarBins+1, IsigmaErr_pt_akPu4PF[iVarBins]);
 
-          jtRecoOverGenVPt_B_FitSigma_akPu4PF[icentBin]->SetBinContent(iVarBins+1, Bsigma_pt_akPu4PF[iVarBins]);
-          jtRecoOverGenVPt_B_FitSigma_akPu4PF[icentBin]->SetBinError(iVarBins+1, BsigmaErr_pt_akPu4PF[iVarBins]);
 
-          jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[icentBin]->SetBinContent(iVarBins+1, csvBsigma_pt_akPu4PF[iVarBins]);
-          jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[icentBin]->SetBinError(iVarBins+1, csvBsigmaErr_pt_akPu4PF[iVarBins]);
 
-          jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[icentBin]->SetBinContent(iVarBins+1, FCRBsigma_pt_akPu4PF[iVarBins]);
-          jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[icentBin]->SetBinError(iVarBins+1, FCRBsigmaErr_pt_akPu4PF[iVarBins]);
+//					jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, FCRcsvBmean_pt_akPu4PF[iVarBins]);
+//					jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, FCRcsvBmeanErr_pt_akPu4PF[iVarBins]);
 
-//          jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF[icentBin]->SetBinContent(iVarBins+1, FCRcsvBsigma_pt_akPu4PF[iVarBins]);
-//          jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF[icentBin]->SetBinError(iVarBins+1, FCRcsvBsigmaErr_pt_akPu4PF[iVarBins]);
+          jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, Isigma_pt_akPu4PF[iVarBins]);
+          jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, IsigmaErr_pt_akPu4PF[iVarBins]);
+
+          jtRecoOverGenVPt_B_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, Bsigma_pt_akPu4PF[iVarBins]);
+          jtRecoOverGenVPt_B_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, BsigmaErr_pt_akPu4PF[iVarBins]);
+
+          jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, csvBsigma_pt_akPu4PF[iVarBins]);
+          jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, csvBsigmaErr_pt_akPu4PF[iVarBins]);
+
+          jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, FCRBsigma_pt_akPu4PF[iVarBins]);
+          jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, FCRBsigmaErr_pt_akPu4PF[iVarBins]);
+
+//          jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, FCRcsvBsigma_pt_akPu4PF[iVarBins]);
+//          jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, FCRcsvBsigmaErr_pt_akPu4PF[iVarBins]);
 
 
 				}
 				if(Var.compare(Var_jtpt)==0) {
-					jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF[icentBin]->SetBinContent(iVarBins+1, Imean_pt_akPu4PF[iVarBins]);
-					jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF[icentBin]->SetBinError(iVarBins+1, ImeanErr_pt_akPu4PF[iVarBins]);
+					jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, Imean_pt_akPu4PF[iVarBins]);
+					jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, ImeanErr_pt_akPu4PF[iVarBins]);
 
-					jtRecoOverGenVRecoPt_B_FitMean_akPu4PF[icentBin]->SetBinContent(iVarBins+1, Bmean_pt_akPu4PF[iVarBins]);
-					jtRecoOverGenVRecoPt_B_FitMean_akPu4PF[icentBin]->SetBinError(iVarBins+1, BmeanErr_pt_akPu4PF[iVarBins]);
+					jtRecoOverGenVRecoPt_B_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, Bmean_pt_akPu4PF[iVarBins]);
+					jtRecoOverGenVRecoPt_B_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, BmeanErr_pt_akPu4PF[iVarBins]);
 
-					jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF[icentBin]->SetBinContent(iVarBins+1, csvBmean_pt_akPu4PF[iVarBins]);
-					jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF[icentBin]->SetBinError(iVarBins+1, csvBmeanErr_pt_akPu4PF[iVarBins]);
+					jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, csvBmean_pt_akPu4PF[iVarBins]);
+					jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, csvBmeanErr_pt_akPu4PF[iVarBins]);
 
-					jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF[icentBin]->SetBinContent(iVarBins+1, FCRBmean_pt_akPu4PF[iVarBins]);
-					jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF[icentBin]->SetBinError(iVarBins+1, FCRBmeanErr_pt_akPu4PF[iVarBins]);
+					jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, FCRBmean_pt_akPu4PF[iVarBins]);
+					jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, FCRBmeanErr_pt_akPu4PF[iVarBins]);
 
-//					jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF[icentBin]->SetBinContent(iVarBins+1, FCRcsvBmean_pt_akPu4PF[iVarBins]);
-//					jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF[icentBin]->SetBinError(iVarBins+1, FCRcsvBmeanErr_pt_akPu4PF[iVarBins]);
+//					jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, FCRcsvBmean_pt_akPu4PF[iVarBins]);
+//					jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, FCRcsvBmeanErr_pt_akPu4PF[iVarBins]);
 
 				}
 
 			}
 
 		}// end for(icentBin)
+		}// end for (iabsEtaBins)
 	}// end   for (int iVartype = 0 ; iVartype <2; iVartype++{
 
 	// write histogram into output files
-	TFile *f_jec = new TFile("Jec_akPu4PF_Corr.root","RECREATE");
+
+  int savefile =1;
+  if (savefile ==1){
+  std::string EtaRange = "eta0to15";
+  TFile *f_jec = new TFile("Jec_akPu4PF_Corr.root","RECREATE");
+
+ for(int iabsEtaBins = 0 ; iabsEtaBins <nabsEtaBins ;iabsEtaBins++){
+    if (iabsEtaBins ==1) { EtaRange ="eta15to20";}
+
+
 	for(int icentBin =0; icentBin <nCentBins ; icentBin++){
-		jtRecoOverGenVPt_Inc_FitMean_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVPt_Inc_JecClosure_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );	
-       jtRecoOverGenVPt_B_FitMean_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVPt_B_JecClosure_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
-    jtRecoOverGenVPt_csvB_FitMean_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVPt_csvB_JecClosure_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
-    jtRecoOverGenVPt_FCRB_FitMean_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVPt_FCRB_JecClosure_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
-//    jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVPt_FCRcsvB_JecClosure_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+		jtRecoOverGenVPt_Inc_FitMean_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_Inc_JecClosure_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2 , EtaRange.c_str()) );	
+       jtRecoOverGenVPt_B_FitMean_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_B_JecClosure_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2 , EtaRange.c_str()) );
+    jtRecoOverGenVPt_csvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_csvB_JecClosure_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2, EtaRange.c_str() ) );
+    jtRecoOverGenVPt_FCRB_FitMean_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_FCRB_JecClosure_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2, EtaRange.c_str() ) );
+//    jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_FCRcsvB_JecClosure_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-    jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
-       jtRecoOverGenVPt_B_FitSigma_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVPt_B_FitSigma_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
-    jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVPt_csvB_FitSigma_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
-    jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
- //   jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
-
-
+    jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2 , EtaRange.c_str()) );
+       jtRecoOverGenVPt_B_FitSigma_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_B_FitSigma_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2, EtaRange.c_str() ) );
+    jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_csvB_FitSigma_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2, EtaRange.c_str() ) );
+    jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2, EtaRange.c_str() ) );
+ //   jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
 
-		//		jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+
+
+		//		jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 		
-		//   jtRecoOverGenVRecoPt_B_FitMean_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVRecoPt_B_FitMean_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+		//   jtRecoOverGenVRecoPt_B_FitMean_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_B_FitMean_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-		// jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+		// jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-		//    jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+		//    jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-		//   jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+		//   jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 		
+	}
 	}
 	f_jec->Write();
 	f_jec->Close();
-
+	}
 
 } // end void jet_SR()
 

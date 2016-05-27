@@ -58,18 +58,18 @@ Bool_t initGetResidualJetCorr(const std::string inResCorrFileName)
     std::cout << Form("resCorr_cent%dto%d_%s", resCentBins[iter+1]/2, resCentBins[iter]/2, EtaRange.c_str() ) << std::endl;
 
     IresidualJetCorrHists_p[iabsEtaBins][iter] = (TH1F*)residualJetCorrFile_p->Get(Form("IresCorr_cent%dto%d_%s", resCentBins[iter+1]/2, resCentBins[iter]/2, EtaRange.c_str() ));    
-    IresidualJetCorrFuncs_p[iter] = (TF1*)IresidualJetCorrHists_p[iter]->GetFunction("f1_p");
+    IresidualJetCorrFuncs_p[iabsEtaBins][iter] = (TF1*)IresidualJetCorrHists_p[iabsEtaBins][iter]->GetFunction("f1_p");
 
 	// added for other types
 	
     BresidualJetCorrHists_p[iabsEtaBins][iter] = (TH1F*)residualJetCorrFile_p->Get(Form("BresCorr_cent%dto%d_%s", resCentBins[iter+1]/2, resCentBins[iter]/2,EtaRange.c_str()));
-    BresidualJetCorrFuncs_p[iter] = (TF1*)BresidualJetCorrHists_p[iter]->GetFunction("f1_p");
+    BresidualJetCorrFuncs_p[iabsEtaBins][iter] = (TF1*)BresidualJetCorrHists_p[iabsEtaBins][iter]->GetFunction("f1_p");
 
     csvBresidualJetCorrHists_p[iabsEtaBins][iter] = (TH1F*)residualJetCorrFile_p->Get(Form("csvBresCorr_cent%dto%d_%s", resCentBins[iter+1]/2, resCentBins[iter]/2,EtaRange.c_str()));
-    csvBresidualJetCorrFuncs_p[iter] = (TF1*)csvBresidualJetCorrHists_p[iter]->GetFunction("f1_p");
+    csvBresidualJetCorrFuncs_p[iabsEtaBins][iter] = (TF1*)csvBresidualJetCorrHists_p[iabsEtaBins][iter]->GetFunction("f1_p");
 
     FCRBresidualJetCorrHists_p[iabsEtaBins][iter] = (TH1F*)residualJetCorrFile_p->Get(Form("FCRBresCorr_cent%dto%d_%s", resCentBins[iter+1]/2, resCentBins[iter]/2,EtaRange.c_str()));
-    FCRBresidualJetCorrFuncs_p[iabsEtaBins][iter] = (TF1*)FCRBresidualJetCorrHists_p[iter]->GetFunction("f1_p");
+    FCRBresidualJetCorrFuncs_p[iabsEtaBins][iter] = (TF1*)FCRBresidualJetCorrHists_p[iabsEtaBins][iter]->GetFunction("f1_p");
 
 //    FCRcsvBresidualJetCorrHists_p[iter] = (TH1F*)residualJetCorrFile_p->Get(Form("FCRcsvBresCorr_cent%dto%d_h", resCentBins[iter+1]/2, resCentBins[iter]/2));
 //    FCRcsvBresidualJetCorrFuncs_p[iter] = (TF1*)FCRcsvBresidualJetCorrHists_p[iter]->GetFunction("f1_p");
@@ -109,7 +109,7 @@ Float_t getResCorrJetPt(Float_t jtPt, Int_t hiBin, double jteta, Int_t type)
 
 	Float_t corrJtPt =-998; 
 	if(type ==0){ // for Inclusive jet
-  corrJtPt = jtPt/residualJetCorrFuncs_p[iabsEtaBins][centPos]->Eval(jtPt);
+  corrJtPt = jtPt/IresidualJetCorrFuncs_p[iabsEtaBins][centPos]->Eval(jtPt);
 	}
 	else if(type ==1){ // for b-jet
   corrJtPt = jtPt/BresidualJetCorrFuncs_p[iabsEtaBins][centPos]->Eval(jtPt);	

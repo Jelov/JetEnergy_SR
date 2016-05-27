@@ -109,9 +109,9 @@ void fit_combine(TChain *tc, std::string Var,std::string filltype, const double 
 		//		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MRL");
 		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
 		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"WL Q MR");
-    h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
-    h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
-    h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
+		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
+		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
+		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
 
 
 		if (f_Ratio[ibin]->GetProb() < .01){cout<<"f1_Ratio[ibin]->GetProb() <0.01"<<endl;}
@@ -123,9 +123,9 @@ void fit_combine(TChain *tc, std::string Var,std::string filltype, const double 
 			h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
 			h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MRL");
 			h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"WL Q MR");
-      h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
-      h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
-      h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
+			h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
+			h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
+			h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
 
 
 		}
@@ -150,7 +150,7 @@ void fit_combine(TChain *tc, std::string Var,std::string filltype, const double 
 	counter++; 
 }
 
-void Muti_Plot(std::string mu_title,std::string filltype,std::string selection,  const char **lineKind_Arr, TCut selectionC , std::string Var , const int ngr, const int nVarBins, double * VarBins_array , double **yArr2, double **yErrArr2)
+void Muti_Plot(std::string mu_title,std::string filltype,std::string etaselection,std::string selection,  const char **lineKind_Arr, TCut selectionC , std::string Var , const int ngr, const int nVarBins, double * VarBins_array , double **yArr2, double **yErrArr2)
 { 
 
 	char filename[]="JetESR_status.txt";
@@ -169,8 +169,8 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string selection, 
 	cout<<"mu_title = "<<mu_title<<" selectionC = "<< selectionC<<endl;
 
 	Can_result[counter1] = new TCanvas(Form("Can_result_%i",counter1));
-//	mutiGR[counter1] = new TMultiGraph("name",Form("%s",mu_title.c_str()));
-  mutiGR[counter1] = new TMultiGraph(Form("%s",mu_title.c_str()),"");
+	//	mutiGR[counter1] = new TMultiGraph("name",Form("%s",mu_title.c_str()));
+	mutiGR[counter1] = new TMultiGraph(Form("%s",mu_title.c_str()),"");
 
 	TGraphErrors *gr_mean[ngr];
 	legend[counter1] = new TLegend(0.65,0.75,0.85,0.88);
@@ -232,7 +232,7 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string selection, 
 	legend[counter1]->Draw();
 
 	TLegend *legend1 = new TLegend(0.25,0.78,0.5,0.88);
-//	legend1->AddEntry((TObject*)0,selection.c_str(),"");
+	//	legend1->AddEntry((TObject*)0,selection.c_str(),"");
 	cout<<"Var = "<<Var<<endl;
 	if (Var.compare("jteta") == 0){ legend1->AddEntry((TObject*)0,"refpt>50","");}
 	if (Var.compare("refpt") == 0){ legend1->AddEntry((TObject*)0,"|#eta_{jet}|<2.0","");}
@@ -281,39 +281,45 @@ void jetE_SR_pp()
 	//	t_temp = tc_akPu4PF;
 
 
-	double ptBin[] = {40,50,60,70,80,90,100,110,120,140,160,200,260,350};
+	//	double ptBin[] = {40,50,60,70,80,90,100,110,120,140,160,200,260,350};
+	double ptBin[] = {20,30,40,50,60,70,80,90,100,110,120,140,160,200,250,310,400,600};
+
 	//	double ptBin[] ={60,70,80,90,100,110,120,140,160,200};
 	const int nPtBins = sizeof(ptBin)/sizeof(ptBin[0]) -1;
 
 	double etaBin[] = {-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2};
 	const int nEtaBins = sizeof(etaBin)/sizeof(etaBin[0])-1;
 
-//	int centBin[] = {0,20,60,100,200};
-	int centBin[] = {0,20,60,200};
+	double absEtaBin[] = {0,1.5,2};
+	const int nabsEtaBins = sizeof(absEtaBin)/sizeof(absEtaBin[0])-1;
+
+	//	int centBin[] = {0,20,60,100,200};
+	// int centBin[] = {0,20,60,200};
+	int centBin[]= {0,10,20,30,40,60,100,140,200};
 	const int nCentBins = sizeof(centBin) / sizeof(centBin[0]) -1;
 
 	//TFile *f_jec = TFile("Jec_akPu4PF","RECREATE");
-	TH1F* jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp;
-	TH1F* jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp;
+	TH1F* jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp[nabsEtaBins];
+	TH1F* jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp[nabsEtaBins];
 
-  TH1F* jtRecoOverGenVPt_B_FitMean_ak4PF_pp;
-  TH1F* jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp;
+	TH1F* jtRecoOverGenVPt_B_FitMean_ak4PF_pp[nabsEtaBins];
+	TH1F* jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp[nabsEtaBins];
 
-  TH1F* jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp;
-  TH1F* jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp;
+	TH1F* jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp[nabsEtaBins];
+	TH1F* jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp[nabsEtaBins];
 
-  TH1F* jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp;
-  TH1F* jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp;
-
-
-  TH1F* jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp;
-  TH1F* jtRecoOverGenVPt_B_FitSigma_ak4PF_pp;
-  TH1F* jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp;
-  TH1F* jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp;
+	TH1F* jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp[nabsEtaBins];
+	TH1F* jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp[nabsEtaBins];
 
 
-//  TH1F* jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp[nCentBins];
-//  TH1F* jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp[nCentBins];
+	TH1F* jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp[nabsEtaBins];
+	TH1F* jtRecoOverGenVPt_B_FitSigma_ak4PF_pp[nabsEtaBins];
+	TH1F* jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp[nabsEtaBins];
+	TH1F* jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp[nabsEtaBins];
+
+
+	//  TH1F* jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp[nCentBins];
+	//  TH1F* jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp[nCentBins];
 
 
 
@@ -331,8 +337,12 @@ void jetE_SR_pp()
 
 	std::string measurement="JES_ak4PF_pp";
 	std::string selection ="Centrality 0-100%";
-//	const char *lineKind[]={"Inclusive Jets","bJets","csV>0.9 bJets","FCR bJets","FCR csV>0.9 bJets"};
-  const char *lineKind[]={"Inclusive Jets","bJets","FCR bJets"};
+	std::string eta_selection="|#eta_{jet}|<2.0";
+	const char *eta_selectionArr[]={"0<|#eta_{jet}|<1.5","1.5|#eta_{jet}|<2.0"};
+
+
+	//	const char *lineKind[]={"Inclusive Jets","bJets","csV>0.9 bJets","FCR bJets","FCR csV>0.9 bJets"};
+	const char *lineKind[]={"Inclusive Jets","bJets","FCR bJets"};
 
 
 	TCut Cut_refpt = "refpt>20";
@@ -390,236 +400,248 @@ void jetE_SR_pp()
 		// double hf_ymax =5;
 		// double hf_ymin =0;
 
-//		for(int icentBin =0; icentBin <nCentBins ; icentBin++)
-			for(int icentBin =0; icentBin <1; icentBin++)	// no centbin in pp
+		//		for(int icentBin =0; icentBin <nCentBins ; icentBin++)
+		for(int iabsEtaBins = 0 ; iabsEtaBins<nabsEtaBins; iabsEtaBins++)
 		{
-			TCut CentBinCut = Form("bin>=%d && bin<=%d",centBin[icentBin],centBin[icentBin+1]);	
-			selection =Form("Centrality %i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2);
+			eta_selection = eta_selectionArr[iabsEtaBins];
+			TCut absEtaBinCut = Form("abs(jteta)>=%f && abs(jteta)<%f",absEtaBin[iabsEtaBins],absEtaBin[iabsEtaBins+1]);
 
-//			AllCut = tempAllCut && CentBinCut;
-			AllCut = tempAllCut;
-			B_AllCut = B_Cut && AllCut;
-			csvB_AllCut = csvtag && B_AllCut;
-			csvL_Allcut = csvtag && Light_Cut && AllCut;	
-			FCRB_AllCut = FCR_Cut && B_AllCut;
-			FCRcsvB_AllCut = FCR_Cut && csvB_AllCut;
+			for(int icentBin =0; icentBin <1; icentBin++)	// no centbin in pp
+			{
+				TCut CentBinCut = Form("bin>=%d && bin<=%d",centBin[icentBin],centBin[icentBin+1]);	
+				selection =Form("Centrality %i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2);
 
-
-			// c_JES_prof->cd(icentBin+1);
-			//    gStyle->SetOptStat(0);
-
-			// for profile plot
-			/*
-				 if (Var.compare(Var_refpt) == 0){
-				 hf_qcd[icentBin] = new TProfile(Form("hf_qcd_%i",(int)icentBin),Form("centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 16,40,200,0,3);
-				 tc_qcd->Draw(Form("jtpt/refpt:refpt>>hf_qcd_%i",(int)icentBin),(AllCut && refpt200)*"weight","prof");
-				 hf_qcd[icentBin]->SetLineColor(1);
-				 hf_qcd[icentBin]->SetMaximum(1.025);
-				 hf_qcd[icentBin]->SetMinimum(0.96);
-				 hf_qcd[icentBin]->GetXaxis()->SetTitle("refpt");
-				 hf_qcd[icentBin]->GetYaxis()->SetTitle("jtpt/refpt");
-				 hf_bjt[icentBin] = new TProfile(Form("hf_bjt_%i",(int)icentBin),Form("bjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 16,40,200,0,3);
-				 tc_bjt->Draw(Form("jtpt/refpt:refpt>>hf_bjt_%i",(int)icentBin),(B_AllCut && refpt200)*"weight","profSAME");
-				 hf_bjt[icentBin]->SetLineColor(2);
-				 hf_csvbjt[icentBin] = new TProfile(Form("hf_csvbjt_%i",(int)icentBin),Form("csvbjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 16,40,200,0,3);
-				 tc_bjt->Draw(Form("jtpt/refpt:refpt>>hf_csvbjt_%i",(int)icentBin),(csvB_AllCut && refpt200)*"weight","profSAME");
-				 hf_csvbjt[icentBin]->SetLineColor(3);
-				 TLegend *le_prof = new TLegend(0.65,0.75,0.85,0.88);
-				 le_prof->AddEntry(hf_qcd[icentBin],"Inclusive Jet","l");
-				 le_prof->AddEntry(hf_bjt[icentBin],"bJet","l");
-				 le_prof->AddEntry(hf_csvbjt[icentBin],"csv>0.9 bJet","l");
-				 le_prof->SetBorderSize(0);
-				 le_prof->Draw();
-
-				 }
-
-				 if (Var.compare(Var_jteta) == 0){
-				 hf_qcd[icentBin] = new TProfile(Form("hf_qcd_%i",(int)icentBin),Form("centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 10,-2,2,0,3);
-				 tc_qcd->Draw(Form("jtpt/refpt:jteta>>hf_qcd_%i",(int)icentBin),(AllCut && refpt200)*"weight","prof");
-				 hf_qcd[icentBin]->SetLineColor(1);
-				 hf_qcd[icentBin]->SetMaximum(1.055);
-				 hf_qcd[icentBin]->SetMinimum(0.955);
-				 hf_qcd[icentBin]->GetXaxis()->SetTitle("jteta");
-				 hf_qcd[icentBin]->GetYaxis()->SetTitle("jtpt/refpt");
-				 hf_bjt[icentBin] = new TProfile(Form("hf_bjt_%i",(int)icentBin),Form("bjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 10,-2,2,0,3);
-				 tc_bjt->Draw(Form("jtpt/refpt:jteta>>hf_bjt_%i",(int)icentBin),(B_AllCut && refpt200)*"weight","profSAME");
-				 hf_bjt[icentBin]->SetLineColor(2);
-				 hf_csvbjt[icentBin] = new TProfile(Form("hf_csvbjt_%i",(int)icentBin),Form("csvbjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 10,-2,2,0,3);
-				 tc_bjt->Draw(Form("jtpt/refpt:jteta>>hf_csvbjt_%i",(int)icentBin),(csvB_AllCut && refpt200)*"weight","profSAME");
-				 hf_csvbjt[icentBin]->SetLineColor(3);
-				 TLegend *le_prof = new TLegend(0.65,0.75,0.85,0.88);
-				 le_prof->AddEntry(hf_qcd[icentBin],"Inclusive Jet","l");
-				 le_prof->AddEntry(hf_bjt[icentBin],"bJet","l");
-				 le_prof->AddEntry(hf_csvbjt[icentBin],"csv>0.9 bJet","l");
-				 le_prof->SetBorderSize(0);
-				 le_prof->Draw();
-
-				 }
-				 */
+				//			AllCut = tempAllCut && CentBinCut;
+				AllCut = tempAllCut &&absEtaBinCut ;
+				B_AllCut = B_Cut && AllCut;
+				csvB_AllCut = csvtag && B_AllCut;
+				csvL_Allcut = csvtag && Light_Cut && AllCut;	
+				FCRB_AllCut = FCR_Cut && B_AllCut;
+				FCRcsvB_AllCut = FCR_Cut && csvB_AllCut;
 
 
-			double Imean_pt_ak4PF_pp[nVarBins];
-			double ImeanErr_pt_ak4PF_pp[nVarBins];
-			double Isigma_pt_ak4PF_pp[nVarBins];
-			double IsigmaErr_pt_ak4PF_pp[nVarBins];
-			fit_combine(tc_qcd , Var,fill_type, VarBin , nVarBins, AllCut , Imean_pt_ak4PF_pp, ImeanErr_pt_ak4PF_pp, Isigma_pt_ak4PF_pp, IsigmaErr_pt_ak4PF_pp);
+				// c_JES_prof->cd(icentBin+1);
+				//    gStyle->SetOptStat(0);
 
-			double Bmean_pt_ak4PF_pp[nVarBins];
-			double BmeanErr_pt_ak4PF_pp[nVarBins];
-			double Bsigma_pt_ak4PF_pp[nVarBins];
-			double BsigmaErr_pt_ak4PF_pp[nVarBins];  
-			fit_combine(tc_bjt , Var,fill_type, VarBin , nVarBins, B_AllCut , Bmean_pt_ak4PF_pp, BmeanErr_pt_ak4PF_pp, Bsigma_pt_ak4PF_pp, BsigmaErr_pt_ak4PF_pp);
+				// for profile plot
+				/*
+					 if (Var.compare(Var_refpt) == 0){
+					 hf_qcd[icentBin] = new TProfile(Form("hf_qcd_%i",(int)icentBin),Form("centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 16,40,200,0,3);
+					 tc_qcd->Draw(Form("jtpt/refpt:refpt>>hf_qcd_%i",(int)icentBin),(AllCut && refpt200)*"weight","prof");
+					 hf_qcd[icentBin]->SetLineColor(1);
+					 hf_qcd[icentBin]->SetMaximum(1.025);
+					 hf_qcd[icentBin]->SetMinimum(0.96);
+					 hf_qcd[icentBin]->GetXaxis()->SetTitle("refpt");
+					 hf_qcd[icentBin]->GetYaxis()->SetTitle("jtpt/refpt");
+					 hf_bjt[icentBin] = new TProfile(Form("hf_bjt_%i",(int)icentBin),Form("bjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 16,40,200,0,3);
+					 tc_bjt->Draw(Form("jtpt/refpt:refpt>>hf_bjt_%i",(int)icentBin),(B_AllCut && refpt200)*"weight","profSAME");
+					 hf_bjt[icentBin]->SetLineColor(2);
+					 hf_csvbjt[icentBin] = new TProfile(Form("hf_csvbjt_%i",(int)icentBin),Form("csvbjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 16,40,200,0,3);
+					 tc_bjt->Draw(Form("jtpt/refpt:refpt>>hf_csvbjt_%i",(int)icentBin),(csvB_AllCut && refpt200)*"weight","profSAME");
+					 hf_csvbjt[icentBin]->SetLineColor(3);
+					 TLegend *le_prof = new TLegend(0.65,0.75,0.85,0.88);
+					 le_prof->AddEntry(hf_qcd[icentBin],"Inclusive Jet","l");
+					 le_prof->AddEntry(hf_bjt[icentBin],"bJet","l");
+					 le_prof->AddEntry(hf_csvbjt[icentBin],"csv>0.9 bJet","l");
+					 le_prof->SetBorderSize(0);
+					 le_prof->Draw();
 
-			double csvBmean_pt_ak4PF_pp[nVarBins];
-			double csvBmeanErr_pt_ak4PF_pp[nVarBins];
-			double csvBsigma_pt_ak4PF_pp[nVarBins];
-			double csvBsigmaErr_pt_ak4PF_pp[nVarBins];
-			fit_combine(tc_bjt , Var,fill_type, VarBin , nVarBins, csvB_AllCut , csvBmean_pt_ak4PF_pp, csvBmeanErr_pt_ak4PF_pp, csvBsigma_pt_ak4PF_pp, csvBsigmaErr_pt_ak4PF_pp);
+					 }
 
-			double FCRBmean_pt_ak4PF_pp[nVarBins];
-			double FCRBmeanErr_pt_ak4PF_pp[nVarBins];
-			double FCRBsigma_pt_ak4PF_pp[nVarBins];
-			double FCRBsigmaErr_pt_ak4PF_pp[nVarBins];
-			fit_combine(tc_bjt , Var,fill_type, VarBin , nVarBins, FCRB_AllCut , FCRBmean_pt_ak4PF_pp, FCRBmeanErr_pt_ak4PF_pp, FCRBsigma_pt_ak4PF_pp, FCRBsigmaErr_pt_ak4PF_pp);
+					 if (Var.compare(Var_jteta) == 0){
+					 hf_qcd[icentBin] = new TProfile(Form("hf_qcd_%i",(int)icentBin),Form("centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 10,-2,2,0,3);
+					 tc_qcd->Draw(Form("jtpt/refpt:jteta>>hf_qcd_%i",(int)icentBin),(AllCut && refpt200)*"weight","prof");
+					 hf_qcd[icentBin]->SetLineColor(1);
+					 hf_qcd[icentBin]->SetMaximum(1.055);
+					 hf_qcd[icentBin]->SetMinimum(0.955);
+					 hf_qcd[icentBin]->GetXaxis()->SetTitle("jteta");
+					 hf_qcd[icentBin]->GetYaxis()->SetTitle("jtpt/refpt");
+					 hf_bjt[icentBin] = new TProfile(Form("hf_bjt_%i",(int)icentBin),Form("bjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 10,-2,2,0,3);
+					 tc_bjt->Draw(Form("jtpt/refpt:jteta>>hf_bjt_%i",(int)icentBin),(B_AllCut && refpt200)*"weight","profSAME");
+					 hf_bjt[icentBin]->SetLineColor(2);
+					 hf_csvbjt[icentBin] = new TProfile(Form("hf_csvbjt_%i",(int)icentBin),Form("csvbjt_centrality%i-%i%%",(int)centBin[icentBin]/2,(int)centBin[icentBin+1]/2), 10,-2,2,0,3);
+					 tc_bjt->Draw(Form("jtpt/refpt:jteta>>hf_csvbjt_%i",(int)icentBin),(csvB_AllCut && refpt200)*"weight","profSAME");
+					 hf_csvbjt[icentBin]->SetLineColor(3);
+					 TLegend *le_prof = new TLegend(0.65,0.75,0.85,0.88);
+					 le_prof->AddEntry(hf_qcd[icentBin],"Inclusive Jet","l");
+					 le_prof->AddEntry(hf_bjt[icentBin],"bJet","l");
+					 le_prof->AddEntry(hf_csvbjt[icentBin],"csv>0.9 bJet","l");
+					 le_prof->SetBorderSize(0);
+					 le_prof->Draw();
 
-			double FCRcsvBmean_pt_ak4PF_pp[nVarBins];
-			double FCRcsvBmeanErr_pt_ak4PF_pp[nVarBins];
-			double FCRcsvBsigma_pt_ak4PF_pp[nVarBins];
-			double FCRcsvBsigmaErr_pt_ak4PF_pp[nVarBins];
-		//	fit_combine(tc_bjt , Var,fill_type, VarBin , nVarBins, FCRcsvB_AllCut , FCRcsvBmean_pt_ak4PF_pp, FCRcsvBmeanErr_pt_ak4PF_pp, FCRcsvBsigma_pt_ak4PF_pp, FCRcsvBsigmaErr_pt_ak4PF_pp);
-
-
-			double csvLmean_pt_ak4PF_pp[nVarBins];
-			double csvLmeanErr_pt_ak4PF_pp[nVarBins];
-			double csvLsigma_pt_ak4PF_pp[nVarBins];
-			double csvLsigmaErr_pt_ak4PF_pp[nVarBins];
-			//  fit_combine(tc_qcd , Var,fill_type, VarBin , nVarBins, csvL_Allcut , csvLmean_pt_ak4PF_pp, csvLmeanErr_pt_ak4PF_pp, csvLsigma_pt_ak4PF_pp, csvLsigmaErr_pt_ak4PF_pp);
-
-/*
-			double *mean2D_pt_ak4PF_pp[4]={Imean_pt_ak4PF_pp , Bmean_pt_ak4PF_pp,csvBmean_pt_ak4PF_pp,FCRBmean_pt_ak4PF_pp};
-			double *meanErr2D_pt_ak4PF_pp[4]={ImeanErr_pt_ak4PF_pp, BmeanErr_pt_ak4PF_pp,csvBmeanErr_pt_ak4PF_pp,FCRBmeanErr_pt_ak4PF_pp};
-			double *sigma2D_pt_ak4PF_pp[4]={Isigma_pt_ak4PF_pp,Bsigma_pt_ak4PF_pp,csvBsigma_pt_ak4PF_pp,FCRBsigma_pt_ak4PF_pp};
-			double *sigmaErr2D_pt_ak4PF_pp[4]={IsigmaErr_pt_ak4PF_pp,BsigmaErr_pt_ak4PF_pp,csvBsigmaErr_pt_ak4PF_pp,FCRBsigmaErr_pt_ak4PF_pp};
-*/
-
-      double *mean2D_pt_ak4PF_pp[3]={Imean_pt_ak4PF_pp , Bmean_pt_ak4PF_pp,FCRBmean_pt_ak4PF_pp};
-      double *meanErr2D_pt_ak4PF_pp[3]={ImeanErr_pt_ak4PF_pp, BmeanErr_pt_ak4PF_pp,FCRBmeanErr_pt_ak4PF_pp};
-      double *sigma2D_pt_ak4PF_pp[3]={Isigma_pt_ak4PF_pp,Bsigma_pt_ak4PF_pp,FCRBsigma_pt_ak4PF_pp};
-      double *sigmaErr2D_pt_ak4PF_pp[3]={IsigmaErr_pt_ak4PF_pp,BsigmaErr_pt_ak4PF_pp,FCRBsigmaErr_pt_ak4PF_pp};
-
-
-
-			measurement="JES";
-			Muti_Plot(measurement,fill_type,selection, lineKind , AllCut, Var, 3, nVarBins , VarBin , mean2D_pt_ak4PF_pp, meanErr2D_pt_ak4PF_pp);
-			measurement="JER";
-			Muti_Plot(measurement,fill_type,selection, lineKind , AllCut, Var, 3, nVarBins , VarBin , sigma2D_pt_ak4PF_pp, sigmaErr2D_pt_ak4PF_pp);
+					 }
+					 */
 
 
-			// save output to histogram
-			if(Var.compare(Var_refpt)==0) {
-				jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp= new TH1F(Form("jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp"),Form("jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp"),nVarBins,VarBin )	;
-        jtRecoOverGenVPt_B_FitMean_ak4PF_pp= new TH1F(Form("jtRecoOverGenVPt_B_FitMean_ak4PF_pp"),Form("jtRecoOverGenVPt_B_FitMean_ak4PF_pp"),nVarBins,VarBin )  ;
-        jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp= new TH1F(Form("jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp"),Form("jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp"),nVarBins,VarBin )  ;
-        jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp= new TH1F(Form("jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp"),Form("jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp"),nVarBins,VarBin )  ;
-   //     jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]= new TH1F(Form("jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp_%i",icentBin),Form("jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp_%i",icentBin),nVarBins,VarBin )  ;
+				double Imean_pt_ak4PF_pp[nVarBins];
+				double ImeanErr_pt_ak4PF_pp[nVarBins];
+				double Isigma_pt_ak4PF_pp[nVarBins];
+				double IsigmaErr_pt_ak4PF_pp[nVarBins];
+				fit_combine(tc_qcd , Var,fill_type, VarBin , nVarBins, AllCut , Imean_pt_ak4PF_pp, ImeanErr_pt_ak4PF_pp, Isigma_pt_ak4PF_pp, IsigmaErr_pt_ak4PF_pp);
 
-        jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp= new TH1F(Form("jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp"),Form("jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp"),nVarBins,VarBin ) ;
-        jtRecoOverGenVPt_B_FitSigma_ak4PF_pp= new TH1F(Form("jtRecoOverGenVPt_B_FitSigma_ak4PF_pp"),Form("jtRecoOverGenVPt_B_FitSigma_ak4PF_pp"),nVarBins,VarBin )  ;
-        jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp= new TH1F(Form("jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp"),Form("jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp"),nVarBins,VarBin )  ;
-        jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp= new TH1F(Form("jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp"),Form("jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp"),nVarBins,VarBin )  ;
+				double Bmean_pt_ak4PF_pp[nVarBins];
+				double BmeanErr_pt_ak4PF_pp[nVarBins];
+				double Bsigma_pt_ak4PF_pp[nVarBins];
+				double BsigmaErr_pt_ak4PF_pp[nVarBins];  
+				fit_combine(tc_bjt , Var,fill_type, VarBin , nVarBins, B_AllCut , Bmean_pt_ak4PF_pp, BmeanErr_pt_ak4PF_pp, Bsigma_pt_ak4PF_pp, BsigmaErr_pt_ak4PF_pp);
+
+				double csvBmean_pt_ak4PF_pp[nVarBins];
+				double csvBmeanErr_pt_ak4PF_pp[nVarBins];
+				double csvBsigma_pt_ak4PF_pp[nVarBins];
+				double csvBsigmaErr_pt_ak4PF_pp[nVarBins];
+				fit_combine(tc_bjt , Var,fill_type, VarBin , nVarBins, csvB_AllCut , csvBmean_pt_ak4PF_pp, csvBmeanErr_pt_ak4PF_pp, csvBsigma_pt_ak4PF_pp, csvBsigmaErr_pt_ak4PF_pp);
+
+				double FCRBmean_pt_ak4PF_pp[nVarBins];
+				double FCRBmeanErr_pt_ak4PF_pp[nVarBins];
+				double FCRBsigma_pt_ak4PF_pp[nVarBins];
+				double FCRBsigmaErr_pt_ak4PF_pp[nVarBins];
+				fit_combine(tc_bjt , Var,fill_type, VarBin , nVarBins, FCRB_AllCut , FCRBmean_pt_ak4PF_pp, FCRBmeanErr_pt_ak4PF_pp, FCRBsigma_pt_ak4PF_pp, FCRBsigmaErr_pt_ak4PF_pp);
+
+				double FCRcsvBmean_pt_ak4PF_pp[nVarBins];
+				double FCRcsvBmeanErr_pt_ak4PF_pp[nVarBins];
+				double FCRcsvBsigma_pt_ak4PF_pp[nVarBins];
+				double FCRcsvBsigmaErr_pt_ak4PF_pp[nVarBins];
+				//	fit_combine(tc_bjt , Var,fill_type, VarBin , nVarBins, FCRcsvB_AllCut , FCRcsvBmean_pt_ak4PF_pp, FCRcsvBmeanErr_pt_ak4PF_pp, FCRcsvBsigma_pt_ak4PF_pp, FCRcsvBsigmaErr_pt_ak4PF_pp);
 
 
-			}
+				double csvLmean_pt_ak4PF_pp[nVarBins];
+				double csvLmeanErr_pt_ak4PF_pp[nVarBins];
+				double csvLsigma_pt_ak4PF_pp[nVarBins];
+				double csvLsigmaErr_pt_ak4PF_pp[nVarBins];
+				//  fit_combine(tc_qcd , Var,fill_type, VarBin , nVarBins, csvL_Allcut , csvLmean_pt_ak4PF_pp, csvLmeanErr_pt_ak4PF_pp, csvLsigma_pt_ak4PF_pp, csvLsigmaErr_pt_ak4PF_pp);
 
-	/*		if(Var.compare(Var_jtpt)==0) {
-				jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_%i",icentBin),nVarBins,VarBin);
-        jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_%i",icentBin),nVarBins,VarBin);
-        jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_%i",icentBin),nVarBins,VarBin);
-        jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_%i",icentBin),nVarBins,VarBin);
-//        jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_%i",icentBin),nVarBins,VarBin);
-			}*/
+				/*
+					 double *mean2D_pt_ak4PF_pp[4]={Imean_pt_ak4PF_pp , Bmean_pt_ak4PF_pp,csvBmean_pt_ak4PF_pp,FCRBmean_pt_ak4PF_pp};
+					 double *meanErr2D_pt_ak4PF_pp[4]={ImeanErr_pt_ak4PF_pp, BmeanErr_pt_ak4PF_pp,csvBmeanErr_pt_ak4PF_pp,FCRBmeanErr_pt_ak4PF_pp};
+					 double *sigma2D_pt_ak4PF_pp[4]={Isigma_pt_ak4PF_pp,Bsigma_pt_ak4PF_pp,csvBsigma_pt_ak4PF_pp,FCRBsigma_pt_ak4PF_pp};
+					 double *sigmaErr2D_pt_ak4PF_pp[4]={IsigmaErr_pt_ak4PF_pp,BsigmaErr_pt_ak4PF_pp,csvBsigmaErr_pt_ak4PF_pp,FCRBsigmaErr_pt_ak4PF_pp};
+					 */
 
-			for(int iVarBins = 0; iVarBins < nVarBins; iVarBins++){
+				double *mean2D_pt_ak4PF_pp[3]={Imean_pt_ak4PF_pp , Bmean_pt_ak4PF_pp,FCRBmean_pt_ak4PF_pp};
+				double *meanErr2D_pt_ak4PF_pp[3]={ImeanErr_pt_ak4PF_pp, BmeanErr_pt_ak4PF_pp,FCRBmeanErr_pt_ak4PF_pp};
+				double *sigma2D_pt_ak4PF_pp[3]={Isigma_pt_ak4PF_pp,Bsigma_pt_ak4PF_pp,FCRBsigma_pt_ak4PF_pp};
+				double *sigmaErr2D_pt_ak4PF_pp[3]={IsigmaErr_pt_ak4PF_pp,BsigmaErr_pt_ak4PF_pp,FCRBsigmaErr_pt_ak4PF_pp};
+
+
+
+				measurement="JES";
+				Muti_Plot(measurement,fill_type,eta_selection,selection, lineKind , AllCut, Var, 3, nVarBins , VarBin , mean2D_pt_ak4PF_pp, meanErr2D_pt_ak4PF_pp);
+				measurement="JER";
+				Muti_Plot(measurement,fill_type,eta_selection,selection, lineKind , AllCut, Var, 3, nVarBins , VarBin , sigma2D_pt_ak4PF_pp, sigmaErr2D_pt_ak4PF_pp);
+
+
+				// save output to histogram
 				if(Var.compare(Var_refpt)==0) {
-					jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp->SetBinContent(iVarBins+1, Imean_pt_ak4PF_pp[iVarBins]);
-					jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp->SetBinError(iVarBins+1, ImeanErr_pt_ak4PF_pp[iVarBins]);
+					jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp[iabsEtaBins]= new TH1F(Form("jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp_eta%i",iabsEtaBins),Form("jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp_eta%i",iabsEtaBins),nVarBins,VarBin )	;
+					jtRecoOverGenVPt_B_FitMean_ak4PF_pp[iabsEtaBins]= new TH1F(Form("jtRecoOverGenVPt_B_FitMean_ak4PF_pp_eta%i",iabsEtaBins),Form("jtRecoOverGenVPt_B_FitMean_ak4PF_pp_eta%i",iabsEtaBins),nVarBins,VarBin )  ;
+					jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp[iabsEtaBins]= new TH1F(Form("jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp_eta%i",iabsEtaBins),Form("jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp_eta%i",iabsEtaBins),nVarBins,VarBin )  ;
+					jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp[iabsEtaBins]= new TH1F(Form("jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp_eta%i",iabsEtaBins),Form("jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp_eta%i",iabsEtaBins),nVarBins,VarBin )  ;
+					//     jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]= new TH1F(Form("jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp_%i",icentBin),Form("jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp_%i",icentBin),nVarBins,VarBin )  ;
 
-	        jtRecoOverGenVPt_B_FitMean_ak4PF_pp->SetBinContent(iVarBins+1, Bmean_pt_ak4PF_pp[iVarBins]);
-          jtRecoOverGenVPt_B_FitMean_ak4PF_pp->SetBinError(iVarBins+1, BmeanErr_pt_ak4PF_pp[iVarBins]);
-
-         jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp->SetBinContent(iVarBins+1, csvBmean_pt_ak4PF_pp[iVarBins]);
-          jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp->SetBinError(iVarBins+1, csvBmeanErr_pt_ak4PF_pp[iVarBins]);
-
-         jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp->SetBinContent(iVarBins+1, FCRBmean_pt_ak4PF_pp[iVarBins]);
-          jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp->SetBinError(iVarBins+1, FCRBmeanErr_pt_ak4PF_pp[iVarBins]);
-
-
-          jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp->SetBinContent(iVarBins+1, Isigma_pt_ak4PF_pp[iVarBins]);
-          jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp->SetBinError(iVarBins+1, IsigmaErr_pt_ak4PF_pp[iVarBins]);
-
-          jtRecoOverGenVPt_B_FitSigma_ak4PF_pp->SetBinContent(iVarBins+1, Bsigma_pt_ak4PF_pp[iVarBins]);
-          jtRecoOverGenVPt_B_FitSigma_ak4PF_pp->SetBinError(iVarBins+1, BsigmaErr_pt_ak4PF_pp[iVarBins]);
-
-         jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp->SetBinContent(iVarBins+1, csvBsigma_pt_ak4PF_pp[iVarBins]);
-          jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp->SetBinError(iVarBins+1, csvBsigmaErr_pt_ak4PF_pp[iVarBins]);
-
-         jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp->SetBinContent(iVarBins+1, FCRBsigma_pt_ak4PF_pp[iVarBins]);
-          jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp->SetBinError(iVarBins+1, FCRBsigmaErr_pt_ak4PF_pp[iVarBins]);
+					jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp[iabsEtaBins]= new TH1F(Form("jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp_eta%i",iabsEtaBins),Form("jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp_eta%i",iabsEtaBins),nVarBins,VarBin ) ;
+					jtRecoOverGenVPt_B_FitSigma_ak4PF_pp[iabsEtaBins]= new TH1F(Form("jtRecoOverGenVPt_B_FitSigma_ak4PF_pp_eta%i",iabsEtaBins),Form("jtRecoOverGenVPt_B_FitSigma_ak4PF_pp_eta%i",iabsEtaBins),nVarBins,VarBin )  ;
+					jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp[iabsEtaBins]= new TH1F(Form("jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp_eta%i",iabsEtaBins),Form("jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp_eta%i",iabsEtaBins),nVarBins,VarBin )  ;
+					jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp[iabsEtaBins]= new TH1F(Form("jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp_eta%i",iabsEtaBins),Form("jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp_eta%i",iabsEtaBins),nVarBins,VarBin )  ;
 
 
-
-//         jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->SetBinContent(iVarBins+1, FCRcsvBmean_pt_ak4PF_pp[iVarBins]);
-//          jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->SetBinError(iVarBins+1, FCRcsvBmeanErr_pt_ak4PF_pp[iVarBins]);
 				}
-/*
-				if(Var.compare(Var_jtpt)==0) {
-					jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp[icentBin]->SetBinContent(iVarBins+1, Imean_pt_ak4PF_pp[iVarBins]);
-					jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp[icentBin]->SetBinError(iVarBins+1, ImeanErr_pt_ak4PF_pp[iVarBins]);
 
-          jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp[icentBin]->SetBinContent(iVarBins+1, Bmean_pt_ak4PF_pp[iVarBins]);
-          jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp[icentBin]->SetBinError(iVarBins+1, BmeanErr_pt_ak4PF_pp[iVarBins]);
+				/*		if(Var.compare(Var_jtpt)==0) {
+							jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_%i",icentBin),nVarBins,VarBin);
+							jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_%i",icentBin),nVarBins,VarBin);
+							jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_%i",icentBin),nVarBins,VarBin);
+							jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_%i",icentBin),nVarBins,VarBin);
+				//        jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp[icentBin] = new TH1F(Form("jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp_%i",icentBin),Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_%i",icentBin),nVarBins,VarBin);
+				}*/
 
-          jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp[icentBin]->SetBinContent(iVarBins+1, csvBmean_pt_ak4PF_pp[iVarBins]);
-          jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp[icentBin]->SetBinError(iVarBins+1, csvBmeanErr_pt_ak4PF_pp[iVarBins]);
+				for(int iVarBins = 0; iVarBins < nVarBins; iVarBins++){
+					if(Var.compare(Var_refpt)==0) {
+						jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp[iabsEtaBins]->SetBinContent(iVarBins+1, Imean_pt_ak4PF_pp[iVarBins]);
+						jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp[iabsEtaBins]->SetBinError(iVarBins+1, ImeanErr_pt_ak4PF_pp[iVarBins]);
 
-          jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp[icentBin]->SetBinContent(iVarBins+1, FCRBmean_pt_ak4PF_pp[iVarBins]);
-          jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp[icentBin]->SetBinError(iVarBins+1, FCRBmeanErr_pt_ak4PF_pp[iVarBins]);
+						jtRecoOverGenVPt_B_FitMean_ak4PF_pp[iabsEtaBins]->SetBinContent(iVarBins+1, Bmean_pt_ak4PF_pp[iVarBins]);
+						jtRecoOverGenVPt_B_FitMean_ak4PF_pp[iabsEtaBins]->SetBinError(iVarBins+1, BmeanErr_pt_ak4PF_pp[iVarBins]);
 
-//          jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->SetBinContent(iVarBins+1, FCRcsvBmean_pt_ak4PF_pp[iVarBins]);
-//          jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->SetBinError(iVarBins+1, FCRcsvBmeanErr_pt_ak4PF_pp[iVarBins]);
+						jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp[iabsEtaBins]->SetBinContent(iVarBins+1, csvBmean_pt_ak4PF_pp[iVarBins]);
+						jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp[iabsEtaBins]->SetBinError(iVarBins+1, csvBmeanErr_pt_ak4PF_pp[iVarBins]);
+
+						jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp[iabsEtaBins]->SetBinContent(iVarBins+1, FCRBmean_pt_ak4PF_pp[iVarBins]);
+						jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp[iabsEtaBins]->SetBinError(iVarBins+1, FCRBmeanErr_pt_ak4PF_pp[iVarBins]);
+
+
+						jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp[iabsEtaBins]->SetBinContent(iVarBins+1, Isigma_pt_ak4PF_pp[iVarBins]);
+						jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp[iabsEtaBins]->SetBinError(iVarBins+1, IsigmaErr_pt_ak4PF_pp[iVarBins]);
+
+						jtRecoOverGenVPt_B_FitSigma_ak4PF_pp[iabsEtaBins]->SetBinContent(iVarBins+1, Bsigma_pt_ak4PF_pp[iVarBins]);
+						jtRecoOverGenVPt_B_FitSigma_ak4PF_pp[iabsEtaBins]->SetBinError(iVarBins+1, BsigmaErr_pt_ak4PF_pp[iVarBins]);
+
+						jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp[iabsEtaBins]->SetBinContent(iVarBins+1, csvBsigma_pt_ak4PF_pp[iVarBins]);
+						jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp[iabsEtaBins]->SetBinError(iVarBins+1, csvBsigmaErr_pt_ak4PF_pp[iVarBins]);
+
+						jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp[iabsEtaBins]->SetBinContent(iVarBins+1, FCRBsigma_pt_ak4PF_pp[iVarBins]);
+						jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp[iabsEtaBins]->SetBinError(iVarBins+1, FCRBsigmaErr_pt_ak4PF_pp[iVarBins]);
+
+
+
+						//         jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->SetBinContent(iVarBins+1, FCRcsvBmean_pt_ak4PF_pp[iVarBins]);
+						//          jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->SetBinError(iVarBins+1, FCRcsvBmeanErr_pt_ak4PF_pp[iVarBins]);
+					}
+					/*
+						 if(Var.compare(Var_jtpt)==0) {
+						 jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp[icentBin]->SetBinContent(iVarBins+1, Imean_pt_ak4PF_pp[iVarBins]);
+						 jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp[icentBin]->SetBinError(iVarBins+1, ImeanErr_pt_ak4PF_pp[iVarBins]);
+
+						 jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp[icentBin]->SetBinContent(iVarBins+1, Bmean_pt_ak4PF_pp[iVarBins]);
+						 jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp[icentBin]->SetBinError(iVarBins+1, BmeanErr_pt_ak4PF_pp[iVarBins]);
+
+						 jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp[icentBin]->SetBinContent(iVarBins+1, csvBmean_pt_ak4PF_pp[iVarBins]);
+						 jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp[icentBin]->SetBinError(iVarBins+1, csvBmeanErr_pt_ak4PF_pp[iVarBins]);
+
+						 jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp[icentBin]->SetBinContent(iVarBins+1, FCRBmean_pt_ak4PF_pp[iVarBins]);
+						 jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp[icentBin]->SetBinError(iVarBins+1, FCRBmeanErr_pt_ak4PF_pp[iVarBins]);
+
+				//          jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->SetBinContent(iVarBins+1, FCRcsvBmean_pt_ak4PF_pp[iVarBins]);
+				//          jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->SetBinError(iVarBins+1, FCRcsvBmeanErr_pt_ak4PF_pp[iVarBins]);
 
 				}*/
 
-			}
+				}
 
-		}// end for(icentBin)
+			}// end for(icentBin)
+		}// end for(iabsEtaBins)
 	}// end   for (int iVartype = 0 ; iVartype <2; iVartype++{
 
 	// write histogram into output files
+  int savefile =1;
+  if (savefile ==1){
+  std::string EtaRange = "eta0to15";
 	TFile *f_jec = new TFile("Jec_ak4PF_pp.root","RECREATE");
-//	for(int icentBin =0; icentBin <nCentBins ; icentBin++){
-		jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp->Write(Form("jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp") );	
-//		jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp[icentBin]->Write(Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-    jtRecoOverGenVPt_B_FitMean_ak4PF_pp->Write(Form("jtRecoOverGenVPt_B_FitMean_ak4PF_pp") );
- //   jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp[icentBin]->Write(Form("jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+ for(int iabsEtaBins = 0 ; iabsEtaBins <nabsEtaBins ;iabsEtaBins++){
+    if (iabsEtaBins ==1) { EtaRange ="eta15to20";}
+	//	for(int icentBin =0; icentBin <nCentBins ; icentBin++){
+	jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp_%s",EtaRange.c_str()) );	
+	//		jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-    jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp->Write(Form("jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp") );
-   // jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp[icentBin]->Write(Form("jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+	jtRecoOverGenVPt_B_FitMean_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_B_FitMean_ak4PF_pp_%s",EtaRange.c_str()) );
+	//   jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-    jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp->Write(Form("jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp") );
-//    jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp[icentBin]->Write(Form("jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+	jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp_%s",EtaRange.c_str()) );
+	// jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-    jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp->Write(Form("jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp") );
-    jtRecoOverGenVPt_B_FitSigma_ak4PF_pp->Write(Form("jtRecoOverGenVPt_B_FitSigma_ak4PF_pp") );
-    jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp->Write(Form("jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp") );
-    jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp->Write(Form("jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp") );
+	jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp_%s",EtaRange.c_str()) );
+	//    jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
+	jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp_%s",EtaRange.c_str()) );
+	jtRecoOverGenVPt_B_FitSigma_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_B_FitSigma_ak4PF_pp_%s",EtaRange.c_str()) );
+	jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp_%s",EtaRange.c_str()) );
+	jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp_%s",EtaRange.c_str()) );
+	} // end for iabsEtaBins.
 
-//    jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->Write(Form("jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
- //   jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->Write(Form("jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+	//    jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->Write(Form("jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+	//   jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->Write(Form("jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-//	}
+	//	}
 	f_jec->Write();
 	f_jec->Close();
 
