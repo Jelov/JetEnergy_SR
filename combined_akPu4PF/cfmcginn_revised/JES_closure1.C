@@ -351,11 +351,11 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string etaselectio
 	cout<<"finish mutigraph"<<endl;
 }
 
-void JES_closure()
+void JES_closure1()
 {
 //	int cal_corrjtpt = 1;
 	int cal_corrjtpt = 0; // 2 for yetkin's correction
-	int use_corrjtpt = 2;
+	int use_corrjtpt = 3;
 
 	char filename[]="JetESR_result.txt";
 	fstream wout;

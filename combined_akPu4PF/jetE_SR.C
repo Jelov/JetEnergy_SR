@@ -25,6 +25,7 @@
 #include <TLatex.h>
 #include <TMath.h>
 #include <TProfile.h>
+#include <TLine.h>
 
 // Global objects
 
@@ -163,8 +164,8 @@ void fit_combine(TChain *tc, std::string Var,std::string filltype, const double 
 	else if(fit_histo == 0){
 	  mean[ibin]=h_Ratio[ibin]->GetMean();
 		meanErr[ibin] = h_Ratio[ibin]->GetMeanError();
-    sigma[ibin]=h_Ratio[ibin]->GetRMS();
-		sigmaErr[ibin] =h_Ratio[ibin]->GetRMSError();
+    sigma[ibin]=h_Ratio[ibin]->GetRMS()/mean[ibin];
+		sigmaErr[ibin] =h_Ratio[ibin]->GetRMSError()/mean[ibin];
 
 	
 	}
@@ -194,7 +195,7 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string etaselectio
 	cout<<"lineKind_Arr 1 = "<<lineKind_Arr[0]<<" ,lineKind_Arr2 = "<<lineKind_Arr[1]<<endl;
 	cout<<"mu_title = "<<mu_title<<" selectionC = "<< selectionC<<endl;
 
-	Can_result[counter1] = new TCanvas(Form("Can_result_%i",counter1));
+	Can_result[counter1] = new TCanvas(Form("Can_result_%i",counter1),Form("Can_result_%i",counter1),600,600);
 //	mutiGR[counter1] = new TMultiGraph("name",Form("%s",mu_title.c_str()));
   mutiGR[counter1] = new TMultiGraph(Form("%s",mu_title.c_str()),"");
 	
@@ -209,7 +210,7 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string etaselectio
 		gr_mean[igr] = new TGraphErrors(nVarBins, VarBinsCenter, yArr2[igr], VarBinsErr , yErrArr2[igr]);
 		gr_mean[igr]->SetTitle(Form("some title_%i", igr));
 		gr_mean[igr]->SetFillStyle(0);
-		gr_mean[igr]->SetMarkerStyle(1);
+		gr_mean[igr]->SetMarkerStyle(24);
 		gr_mean[igr]->SetLineColor(igr+1);	
 		gr_mean[igr]->SetMarkerColor(igr+1);
 		mutiGR[counter1]->Add(gr_mean[igr]);
@@ -273,6 +274,10 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string etaselectio
 	legend1->SetBorderSize(0);
 	legend1->Draw();
 
+	TLine *line = new TLine(20,1,600,1);
+	line->SetLineStyle(7);
+	line->Draw("SAME");
+
 	/*	TLatex *tex = new TLatex(0.35,0.8,"#bf{#color[2]{|#eta_{jet}|<2.0}}");
 			tex->SetNDC();
 			tex->SetTextFont(43);
@@ -324,12 +329,15 @@ void jetE_SR()
 	double etaBin[] = {-2,-1.6,-1.2,-0.8,-0.4,0,0.4,0.8,1.2,1.6,2};
 	const int nEtaBins = sizeof(etaBin)/sizeof(etaBin[0])-1;
 
-	double absEtaBin[] = {0,1.5,2};
+	// double absEtaBin[] = {0,1.5,2};
+  double absEtaBin[] = {0,1.5};
+
 	const int nabsEtaBins = sizeof(absEtaBin)/sizeof(absEtaBin[0])-1;
 
 //	int centBin[] = {0,20,60,100,200};
-//	int centBin[] = {0,20,60,200};
-	int centBin[]= {0,10,20,30,40,60,100,140,200};
+	int centBin[] = {0,20,60,200};
+//	int centBin[] = {0,10,20,40,60,100,200};
+//	int centBin[]= {0,10,20,30,40,60,100,140,200};
 	const int nCentBins = sizeof(centBin) / sizeof(centBin[0]) -1;
 
 	//TFile *f_jec = TFile("Jec_akPu4PF","RECREATE");
@@ -350,18 +358,24 @@ void jetE_SR()
 
   TH1F* jtRecoOverGenVPt_Inc_FitMean_akPu4PF[nabsEtaBins][nCentBins];
   TH1F* jtRecoOverGenVRecoPt_Inc_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[nabsEtaBins][nCentBins];
+
 
   TH1F* jtRecoOverGenVPt_B_FitMean_akPu4PF[nabsEtaBins][nCentBins];
   TH1F* jtRecoOverGenVRecoPt_B_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVPt_B_FitSigma_akPu4PF[nabsEtaBins][nCentBins];
 
   TH1F* jtRecoOverGenVPt_csvB_FitMean_akPu4PF[nabsEtaBins][nCentBins];
   TH1F* jtRecoOverGenVRecoPt_csvB_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[nabsEtaBins][nCentBins];
 
   TH1F* jtRecoOverGenVPt_FCRB_FitMean_akPu4PF[nabsEtaBins][nCentBins];
   TH1F* jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[nabsEtaBins][nCentBins];
 
   TH1F* jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[nabsEtaBins][nCentBins];
   TH1F* jtRecoOverGenVRecoPt_FCRcsvB_FitMean_akPu4PF[nabsEtaBins][nCentBins];
+  TH1F* jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF[nabsEtaBins][nCentBins];
 
 
 //  TH1F* jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[nCentBins];
@@ -376,7 +390,7 @@ void jetE_SR()
 	std::string Var_jteta = "jteta";
 	std::string Var_jtpt ="jtpt";
 
-	std::string Var=Var_refpt;
+	std::string Var=Var_cent;
 	std::string fill_type = "ratio"; //ratio or residue
 	//std::string fill_type = "residue"; //ratio or residue
 	const char *Var_array[]={"refpt","jtpt"};
@@ -594,6 +608,12 @@ void jetE_SR()
         jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
 
 
+          jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+          jtRecoOverGenVPt_B_FitSigma_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_B_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_B_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+          jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_csvB_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_csvB_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+          jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+          jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF[iabsEtaBins][icentBin] = new TH1F(Form("jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),Form("jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF_%i%i",iabsEtaBins,icentBin),nVarBins,VarBin);
+
 
 
 			}
@@ -635,6 +655,19 @@ void jetE_SR()
 
          jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, FCRcsvBmean_pt_akPu4PF[iVarBins]);
           jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, FCRcsvBmeanErr_pt_akPu4PF[iVarBins]);
+
+
+            jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, Isigma_pt_akPu4PF[iVarBins]);
+            jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, IsigmaErr_pt_akPu4PF[iVarBins]);
+
+            jtRecoOverGenVPt_B_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, Bsigma_pt_akPu4PF[iVarBins]);
+            jtRecoOverGenVPt_B_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, BsigmaErr_pt_akPu4PF[iVarBins]);
+
+            jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, csvBsigma_pt_akPu4PF[iVarBins]);
+            jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, csvBsigmaErr_pt_akPu4PF[iVarBins]);
+
+            jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinContent(iVarBins+1, FCRBsigma_pt_akPu4PF[iVarBins]);
+            jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->SetBinError(iVarBins+1, FCRBsigmaErr_pt_akPu4PF[iVarBins]);
 
 
 
@@ -686,6 +719,13 @@ void jetE_SR()
     jtRecoOverGenVPt_FCRB_FitMean_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_FCRB_FitMean_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2 , EtaRange.c_str()) );
 
     jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_FCRcsvB_FitMean_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2 , EtaRange.c_str()) );
+
+
+
+       jtRecoOverGenVPt_Inc_FitSigma_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_Inc_FitSigma_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2 , EtaRange.c_str()) );
+        jtRecoOverGenVPt_B_FitSigma_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_B_FitSigma_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2, EtaRange.c_str() ) );
+        jtRecoOverGenVPt_csvB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_csvB_FitSigma_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2, EtaRange.c_str() ) );
+        jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVPt_FCRB_FitSigma_akPu4PF_cent%dto%d_%s", centBin[icentBin]/2, centBin[icentBin+1]/2, EtaRange.c_str() ) );
 
 
 //    jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF[icentBin]->Write(Form("jtRecoOverGenVRecoPt_FCRB_FitMean_akPu4PF_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );

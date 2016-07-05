@@ -1,4 +1,4 @@
-// Cheng-Chieh Peng
+
 // read output of runForest_PbPb_MC. 
 // Analyze pt resolution in PbPb event.
 // plot jtpt/refpt distribution for reftpt.
@@ -44,7 +44,8 @@ void fit_combine(TChain *tc, std::string Var,std::string filltype, const double 
 	Can_Temp[counter] = new TCanvas(Form("Can_Temp_%i",counter));
 	if(nVarBins<=9){Can_Temp[counter]->Divide(3,3);}
 	else if(nVarBins<=12) {Can_Temp[counter]->Divide(3,4);}
-	else {Can_Temp[counter]->Divide(4,4);}
+	else if(nVarBins<=16) {Can_Temp[counter]->Divide(4,4);}
+	else {Can_Temp[counter]->Divide(5,4);}
 
 
 	TH1D *h_Ratio[nVarBins];
@@ -64,6 +65,9 @@ void fit_combine(TChain *tc, std::string Var,std::string filltype, const double 
 		Can_Temp[counter]->cd(ibin+1);
 		double VarMin = VarBins_array[ibin];
 		double VarMax = VarBins_array[ibin+1];
+		int fit_histo =0;
+		//    if( Var.compare("refpt")==0 && (VarMax<=40 || VarMin >=400) ){fit_histo=0;} 
+
 
 		h_Ratio[ibin] = new TH1D( Form("h_Ratio[%d]",ibin),Form("%s_%s_%i_%i",jetTitle.c_str(),Var.c_str(),(int)VarMin,(int)VarMax) ,nRatiobins,minRatio,maxRatio);  // h_Ration_%d ??
 		h_Ratio[ibin]->Sumw2();
@@ -84,64 +88,90 @@ void fit_combine(TChain *tc, std::string Var,std::string filltype, const double 
 
 		h_Ratio[ibin]->GetXaxis()->SetTitle(Form("%s, jtpt/refpt",Gcut.GetTitle()));
 
-		if (filltype.compare("ratio")==0){
-			f_Ratio[ibin] = new TF1(Form("f_Ratio_%d",ibin), "gaus",mean_temp-3*rms_temp,mean_temp+3*rms_temp );}
-		if (filltype.compare("residue")==0){
-			f_Ratio[ibin] = new TF1(Form("f_Ratio_%d",ibin), "gaus",-3*rms_temp,3*rms_temp );}
 
-
-		f_Ratio[ibin]->SetParameter(0,h_Ratio[ibin]->GetEntries()); // get number for normalization
-		if(ibin==0){
+		if (fit_histo==1){
 			if (filltype.compare("ratio")==0){
-				f_Ratio[ibin]->SetParameter(1,h_Ratio[ibin]->GetMean()) ;   // for mean
-				f_Ratio[ibin]->SetParameter(2,h_Ratio[ibin]->GetRMS()) ; // for sigma   
-			}
+				f_Ratio[ibin] = new TF1(Form("f_Ratio_%d",ibin), "gaus",mean_temp-3*rms_temp,mean_temp+3*rms_temp );}
 			if (filltype.compare("residue")==0){
-				f_Ratio[ibin]->SetParameter(1,h_Ratio[ibin]->GetMean()-1) ;   // for mean
-				f_Ratio[ibin]->SetParameter(2,h_Ratio[ibin]->GetRMS()) ; // for sigma
-			}	
-		}
-		if(ibin>=1){
-			f_Ratio[ibin]->SetParameter(1,mean[ibin-1]) ;   // for mean
-			f_Ratio[ibin]->SetParameter(2,sigma[ibin-1]) ; // for sigma   
-		} 
-		//		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
-		//		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MRL");
-		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
-		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"WL Q MR");
-		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
-		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
-		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
+				f_Ratio[ibin] = new TF1(Form("f_Ratio_%d",ibin), "gaus",-3*rms_temp,3*rms_temp );}
 
 
-		if (f_Ratio[ibin]->GetProb() < .01){cout<<"f1_Ratio[ibin]->GetProb() <0.01"<<endl;}
-
-		if(f_Ratio[ibin]->GetParError(1) > 0.05 || f_Ratio[ibin]->GetProb() < .001){
-			f_Ratio[ibin] = new TF1(Form("f_Ratio_%d",ibin), "gaus",mean_temp-2*rms_temp,mean_temp+2*rms_temp );
-			f_Ratio[ibin]->SetParameter(1,h_Ratio[ibin]->GetMean());
-			f_Ratio[ibin]->SetParameter(2,h_Ratio[ibin]->GetRMS()) ; 	
+			f_Ratio[ibin]->SetParameter(0,h_Ratio[ibin]->GetEntries()); // get number for normalization
+			if(ibin==0){
+				if (filltype.compare("ratio")==0){
+					f_Ratio[ibin]->SetParameter(1,h_Ratio[ibin]->GetMean()) ;   // for mean
+					f_Ratio[ibin]->SetParameter(2,h_Ratio[ibin]->GetRMS()) ; // for sigma   
+				}
+				if (filltype.compare("residue")==0){
+					f_Ratio[ibin]->SetParameter(1,h_Ratio[ibin]->GetMean()-1) ;   // for mean
+					f_Ratio[ibin]->SetParameter(2,h_Ratio[ibin]->GetRMS()) ; // for sigma
+				}	
+			}
+			if(ibin>=1){
+				f_Ratio[ibin]->SetParameter(1,mean[ibin-1]) ;   // for mean
+				f_Ratio[ibin]->SetParameter(2,sigma[ibin-1]) ; // for sigma   
+			} 
+			//		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
+			//		h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MRL");
 			h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
-			h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MRL");
 			h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"WL Q MR");
 			h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
 			h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
 			h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
 
 
+			if (f_Ratio[ibin]->GetProb() < .01){cout<<"f1_Ratio[ibin]->GetProb() <0.01"<<endl;}
+
+			if(f_Ratio[ibin]->GetParError(1) > 0.05 || f_Ratio[ibin]->GetProb() < .001){
+				f_Ratio[ibin] = new TF1(Form("f_Ratio_%d",ibin), "gaus",mean_temp-2*rms_temp,mean_temp+2*rms_temp );
+				f_Ratio[ibin]->SetParameter(1,h_Ratio[ibin]->GetMean());
+				f_Ratio[ibin]->SetParameter(2,h_Ratio[ibin]->GetRMS()) ; 	
+				h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
+				h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MRL");
+				h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"WL Q MR");
+				h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
+				h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
+				h_Ratio[ibin]->Fit(Form("f_Ratio_%d",ibin),"MR");
+
+
+			}
+
+			/*
+				 legendfit[ibin]= new TLegend(0.2,0.2,0.7,0.4);
+				 legendfit[ibin]->AddEntry((TObject*)0,Form("%s",Gcut.GetTitle()),"");
+				 legendfit[ibin]->SetBorderSize(0);
+				 legendfit[ibin]->Draw();
+				 */
+
+
+			mean[ibin] = f_Ratio[ibin]->GetParameter(1);
+			meanErr[ibin] = f_Ratio[ibin]->GetParError(1);
+			sigma[ibin] = f_Ratio[ibin]->GetParameter(2)/mean[ibin];
+			sigmaErr[ibin] = f_Ratio[ibin]->GetParError(2)/mean[ibin];
+
+
+			if(mean[ibin] >=2 || meanErr[ibin] >=2){ // prevent bad value from fit
+				mean[ibin]=h_Ratio[ibin]->GetMean();
+				meanErr[ibin] = h_Ratio[ibin]->GetMeanError();
+				sigma[ibin]=h_Ratio[ibin]->GetRMS()/mean[ibin];
+				sigmaErr[ibin] =h_Ratio[ibin]->GetRMSError()/mean[ibin];
+
+			}
+
+
+		}// end if fit_histo ==1
+
+		else if(fit_histo == 0){
+			mean[ibin]=h_Ratio[ibin]->GetMean();
+			meanErr[ibin] = h_Ratio[ibin]->GetMeanError();
+			sigma[ibin]=h_Ratio[ibin]->GetRMS()/mean[ibin];
+			sigmaErr[ibin] =h_Ratio[ibin]->GetRMSError()/mean[ibin];
+
+
 		}
 
-		/*
-			 legendfit[ibin]= new TLegend(0.2,0.2,0.7,0.4);
-			 legendfit[ibin]->AddEntry((TObject*)0,Form("%s",Gcut.GetTitle()),"");
-			 legendfit[ibin]->SetBorderSize(0);
-			 legendfit[ibin]->Draw();
-			 */
 
 
-		mean[ibin] = f_Ratio[ibin]->GetParameter(1);
-		meanErr[ibin] = f_Ratio[ibin]->GetParError(1);
-		sigma[ibin] = f_Ratio[ibin]->GetParameter(2);
-		sigmaErr[ibin] = f_Ratio[ibin]->GetParError(2);
 
 	} // end   for(int ibin =0; ibin<nVarBins; ibin++)
 
@@ -198,6 +228,8 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string etaselectio
 
 	mutiGR[counter1]->Draw("AP");
 	mutiGR[counter1]->GetXaxis()->SetTitle(Form("%s",Var.c_str())); // must after draw to create a vitual histogram like object to set title.
+	if (Var.compare("refpt") ==0)
+		mutiGR[counter1]->GetXaxis()->SetTitle("genJet p_{T} (GeV)");
 	if (mu_title.compare("JES") == 0)
 		mutiGR[counter1]->GetYaxis()->SetTitle("#mu_{Reco./Gen.} ak4PF_pp");
 	if (mu_title.compare("JER") == 0)
@@ -235,7 +267,8 @@ void Muti_Plot(std::string mu_title,std::string filltype,std::string etaselectio
 	//	legend1->AddEntry((TObject*)0,selection.c_str(),"");
 	cout<<"Var = "<<Var<<endl;
 	if (Var.compare("jteta") == 0){ legend1->AddEntry((TObject*)0,"refpt>50","");}
-	if (Var.compare("refpt") == 0){ legend1->AddEntry((TObject*)0,"|#eta_{jet}|<2.0","");}
+	//	if (Var.compare("refpt") == 0){ legend1->AddEntry((TObject*)0,"|#eta_{jet}|<2.0","");}
+	if (Var.compare("refpt") == 0){ legend1->AddEntry((TObject*)0,etaselection.c_str(),"");}
 	legend1->SetBorderSize(0);
 	legend1->Draw();
 
@@ -295,7 +328,9 @@ void jetE_SR_pp()
 
 	//	int centBin[] = {0,20,60,100,200};
 	// int centBin[] = {0,20,60,200};
-	int centBin[]= {0,10,20,30,40,60,100,140,200};
+//	int centBin[]= {0,10,20,30,40,60,100,140,200};
+  int centBin[] = {0,10,20,40,60,100,200};
+
 	const int nCentBins = sizeof(centBin) / sizeof(centBin[0]) -1;
 
 	//TFile *f_jec = TFile("Jec_akPu4PF","RECREATE");
@@ -612,39 +647,39 @@ void jetE_SR_pp()
 	}// end   for (int iVartype = 0 ; iVartype <2; iVartype++{
 
 	// write histogram into output files
-  int savefile =1;
-  if (savefile ==1){
-  std::string EtaRange = "eta0to15";
-	TFile *f_jec = new TFile("Jec_ak4PF_pp.root","RECREATE");
+	int savefile =1;
+	if (savefile ==1){
+		std::string EtaRange = "eta0to15";
+		TFile *f_jec = new TFile("Jec_ak4PF_pp.root","RECREATE");
 
- for(int iabsEtaBins = 0 ; iabsEtaBins <nabsEtaBins ;iabsEtaBins++){
-    if (iabsEtaBins ==1) { EtaRange ="eta15to20";}
-	//	for(int icentBin =0; icentBin <nCentBins ; icentBin++){
-	jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp_%s",EtaRange.c_str()) );	
-	//		jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+		for(int iabsEtaBins = 0 ; iabsEtaBins <nabsEtaBins ;iabsEtaBins++){
+			if (iabsEtaBins ==1) { EtaRange ="eta15to20";}
+			//	for(int icentBin =0; icentBin <nCentBins ; icentBin++){
+			jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_Inc_FitMean_ak4PF_pp_%s",EtaRange.c_str()) );	
+			//		jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_Inc_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-	jtRecoOverGenVPt_B_FitMean_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_B_FitMean_ak4PF_pp_%s",EtaRange.c_str()) );
-	//   jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+			jtRecoOverGenVPt_B_FitMean_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_B_FitMean_ak4PF_pp_%s",EtaRange.c_str()) );
+			//   jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_B_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-	jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp_%s",EtaRange.c_str()) );
-	// jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+			jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_csvB_FitMean_ak4PF_pp_%s",EtaRange.c_str()) );
+			// jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_csvB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-	jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp_%s",EtaRange.c_str()) );
-	//    jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+			jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_FCRB_FitMean_ak4PF_pp_%s",EtaRange.c_str()) );
+			//    jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp[iabsEtaBins][icentBin]->Write(Form("jtRecoOverGenVRecoPt_FCRB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-	jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp_%s",EtaRange.c_str()) );
-	jtRecoOverGenVPt_B_FitSigma_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_B_FitSigma_ak4PF_pp_%s",EtaRange.c_str()) );
-	jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp_%s",EtaRange.c_str()) );
-	jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp_%s",EtaRange.c_str()) );
-	} // end for iabsEtaBins.
+			jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp_%s",EtaRange.c_str()) );
+			jtRecoOverGenVPt_B_FitSigma_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_B_FitSigma_ak4PF_pp_%s",EtaRange.c_str()) );
+			jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp_%s",EtaRange.c_str()) );
+			jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp[iabsEtaBins]->Write(Form("jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp_%s",EtaRange.c_str()) );
 
-	//    jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->Write(Form("jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
-	//   jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->Write(Form("jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+			//    jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->Write(Form("jtRecoOverGenVPt_FCRcsvB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
+			//   jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp[icentBin]->Write(Form("jtRecoOverGenVRecoPt_FCRcsvB_FitMean_ak4PF_pp_cent%dto%d_h", centBin[icentBin]/2, centBin[icentBin+1]/2 ) );
 
-	//	}
-	f_jec->Write();
-	f_jec->Close();
+		} // end for iabsEtaBins.
 
+		f_jec->Write();
+		f_jec->Close();
+		} // end if savefile
 
-} // end void jet_SR()
+	} // end void jet_SR()
 

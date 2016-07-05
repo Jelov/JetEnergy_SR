@@ -12,16 +12,17 @@
 const std::string resString1 = "RESIDUALHIST.root";
 const std::string resString2 = "RESIDUAL2HIST.root";
 
-const Int_t nCentBins = 8;
-//const Int_t centBins[nCentBins+1] = {0, 10, 30, 100};
+// const Int_t nCentBins = 8;
+const Int_t centBins[] = {0, 10, 30, 100};
 
 //const  int centBins[nCentBins+1]= {0,10,20,30,40,60,100,140,200};
-const  int centBins[nCentBins+1]= {0,5,10,15,20,30,50,70,100};
+//const  int centBins[nCentBins+1]= {0,5,10,15,20,30,50,70,100};
+const Int_t nCentBins =  sizeof(centBins) / sizeof(centBins[0]) -1;
 
 
-
-const Int_t nabsEtaBins = 2;
-const Double_t absEtaBin[nabsEtaBins+1] = {0,1.5,2};
+//const Int_t nabsEtaBins = 2;
+const Double_t absEtaBin[] = {0,1.5};
+const int nabsEtaBins = sizeof(absEtaBin)/sizeof(absEtaBin[0])-1;
 
 
 //TCanvas *c_fit = new TCanvas("c_fit","c_fit");
@@ -32,7 +33,7 @@ void FitResidual1(TH1F* hist_p, TH1F* histPerph_p = NULL)
   if(hist_p->GetEntries() == 0) return;
 	cout<<"check a"<<endl;
 
-  TF1* f1_p = new TF1("f1_p", Form("[0] + [1]/TMath::Sqrt(x) + [2]/x"), 30, hist_p->GetXaxis()->GetXmax());
+  TF1* f1_p = new TF1("f1_p", Form("[0] + [1]/TMath::Sqrt(x) + [2]/x"), 20, hist_p->GetXaxis()->GetXmax());
 
   Float_t xVal0 = hist_p->GetBinCenter(1);
   Float_t xVal1 = hist_p->GetBinCenter((Int_t)(hist_p->GetNbinsX()/2));
@@ -73,11 +74,11 @@ void FitResidual1(TH1F* hist_p, TH1F* histPerph_p = NULL)
   hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
   hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
 */
-  hist_p->Fit("f1_p", "Q M", "", 40, 400);
-  hist_p->Fit("f1_p", "Q M", "", 40, 400);
-  hist_p->Fit("f1_p", "Q M", "", 40, 400);
-  hist_p->Fit("f1_p", "Q M", "", 40, 400);
-  hist_p->Fit("f1_p", "Q M", "", 40, 400);
+  hist_p->Fit("f1_p", "Q M", "", 70, 250);
+  hist_p->Fit("f1_p", "Q M", "", 70, 250);
+  hist_p->Fit("f1_p", "Q M", "", 70, 250);
+  hist_p->Fit("f1_p", "Q M", "", 70, 250);
+  hist_p->Fit("f1_p", "Q M", "", 70, 250);
   cout<<"check d"<<endl;
 
 

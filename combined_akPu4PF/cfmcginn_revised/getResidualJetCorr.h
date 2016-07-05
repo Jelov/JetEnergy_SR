@@ -10,12 +10,17 @@
 
 const std::string residualStr = "RESIDUALCORR";
 
-const Int_t nResCentBins = 8;
-//const Int_t resCentBins[nResCentBins+1] = {200, 60, 20, 0};
-const Int_t resCentBins[nResCentBins+1] = {200,140,100,60,40,30,20,10,0};
+// const Int_t nResCentBins = 8;
 
-const Int_t nabsEtaBins = 2;
-const Double_t absEtaBin[nabsEtaBins+1] = {0,1.5,2};
+const Int_t resCentBins[] = {200, 60, 20, 0};
+// const Int_t resCentBins[nResCentBins+1] = {200,140,100,60,40,30,20,10,0};
+const Int_t nResCentBins =  sizeof(resCentBins) / sizeof(resCentBins[0]) -1;
+
+
+//const Int_t nabsEtaBins = 2;
+const Double_t absEtaBin[] = {0,1.5};
+const int nabsEtaBins = sizeof(absEtaBin)/sizeof(absEtaBin[0])-1;
+
 
 
 
@@ -81,7 +86,7 @@ Bool_t initGetResidualJetCorr(const std::string inResCorrFileName)
 }
 
 
-Float_t getResCorrJetPt(Float_t jtPt, Int_t hiBin, double jteta, Int_t type)
+Float_t getResCorrJetPt(Float_t jtPt, Int_t hiBin, double jteta, Int_t type, Float_t refpt)
 {
   if(jtPt < 0){
     std::cout << "Input jtpt < 0. return -999" << std::endl;
@@ -104,7 +109,7 @@ Float_t getResCorrJetPt(Float_t jtPt, Int_t hiBin, double jteta, Int_t type)
 	Int_t iabsEtaBins = 0; // set default to 0, correct all other eta with eta<1.5 correction
 	if(abs(jteta)<=1.5 && abs(jteta) >0 ){ iabsEtaBins =0; }
 	else if( abs(jteta)<2 && abs(jteta)>1.5 ){iabsEtaBins =1; }
-
+	if(iabsEtaBins ==1){ return -997;}
 
 
 	Float_t corrJtPt =-998; 

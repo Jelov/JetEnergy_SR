@@ -9,17 +9,20 @@
 #include <TGraph.h>
 
 //const Int_t nCentBins = 3;
-//const Int_t centBins[nCentBins+1] = {0, 10, 30, 100};
+const Int_t centBins[] = {0, 10, 30, 100};
 
-const Int_t nCentBins = 8;
-const  int centBins[nCentBins+1]= {0,5,10,15,20,30,50,70,100};
+//const Int_t nCentBins = 8;
+//const  int centBins[nCentBins+1]= {0,5,10,15,20,30,50,70,100};
+const Int_t nCentBins =  sizeof(centBins) / sizeof(centBins[0]) -1;
+
 
 double ptBin[] = {20,30,40,50,60,70,80,90,100,110,120,140,160,200,250,310,400,600};
 //double ptBin[] = {40,50,60,70,80,90,100,110,120,140,160,200,260,350};
 const int nPtBins = sizeof(ptBin)/sizeof(ptBin[0]) -1;
 
-const Int_t nabsEtaBins = 2;
-const Double_t absEtaBin[nabsEtaBins+1] = {0,1.5,2};
+//const Int_t nabsEtaBins = 2;
+const Double_t absEtaBin[] = {0,1.5};
+const int nabsEtaBins = sizeof(absEtaBin)/sizeof(absEtaBin[0])-1;
 
 
 
@@ -35,19 +38,24 @@ void plotfit(std::string jettype, TFile *f_read, std::string his_title)
 
   TH1F* h_reCorr[nabsEtaBins][nCentBins];
   TLegend* le[nabsEtaBins][nCentBins];
+  TF1* f1_p[nabsEtaBins][nCentBins];
+  TF1* f2_p[nabsEtaBins][nCentBins];
 
 
 	for(Int_t iabsEtaBins =0; iabsEtaBins<nabsEtaBins;iabsEtaBins++){
 	    EtaRange = EtaRangeArr[iabsEtaBins];
 
 
-  C_plot[iabsEtaBins][counter] = new TCanvas(Form("C_plot_%s_%s",jettype.c_str(),EtaRange.c_str()), Form("C_plot_%s_%s",jettype.c_str(),EtaRange.c_str()) );
-  C_plot[iabsEtaBins][counter]->Divide(4,2);
-
+  C_plot[iabsEtaBins][counter] = new TCanvas(Form("C_plot_%s_%s",jettype.c_str(),EtaRange.c_str()), Form("C_plot_%s_%s",jettype.c_str(),EtaRange.c_str()),1200,400 );
+  // C_plot[iabsEtaBins][counter]->Divide(4,2);
+C_plot[iabsEtaBins][counter]->Divide(3,1);
 
   for(int iCentBins=0; iCentBins < nCentBins; iCentBins++)
   {
     h_reCorr[iabsEtaBins][iCentBins] = (TH1F*)f_read->Get(Form("%s_cent%dto%d_%s",jettype.c_str(), centBins[iCentBins], centBins[iCentBins+1],EtaRange.c_str()));
+    f1_p[iabsEtaBins][iCentBins]= h_reCorr[iabsEtaBins][iCentBins]->GetFunction("f1_p");
+    f2_p[iabsEtaBins][iCentBins] = (TF1*)f1_p[iabsEtaBins][iCentBins]->Clone();
+
     C_plot[iabsEtaBins][counter]->cd(iCentBins+1);
     le[iabsEtaBins][iCentBins] = new TLegend(0.2,0.75,0.45,0.88);
     le[iabsEtaBins][iCentBins]->SetBorderSize(0);
@@ -59,15 +67,25 @@ void plotfit(std::string jettype, TFile *f_read, std::string his_title)
     h_reCorr[iabsEtaBins][iCentBins]->GetXaxis()->SetTitle("genJet p_{T} (GeV)");
     double ymax = h_reCorr[iabsEtaBins][iCentBins]->GetMaximum();
     double ymin = h_reCorr[iabsEtaBins][iCentBins]->GetMinimum();
-    h_reCorr[iabsEtaBins][iCentBins]->SetMaximum( ymax + 0.45*(ymax-ymin) );
-    h_reCorr[iabsEtaBins][iCentBins]->SetMinimum( ymin - 0.1*(ymax-ymin) );
-//    h_reCorr[iabsEtaBins][iCentBins]->SetMaximum( 1.12 );
-//    h_reCorr[iabsEtaBins][iCentBins]->SetMinimum( 0.93 );
+    // h_reCorr[iabsEtaBins][iCentBins]->SetMaximum( ymax + 0.45*(ymax-ymin) );
+    // h_reCorr[iabsEtaBins][iCentBins]->SetMinimum( ymin - 0.1*(ymax-ymin) );
+    h_reCorr[iabsEtaBins][iCentBins]->SetMaximum( 1.15 );
+    h_reCorr[iabsEtaBins][iCentBins]->SetMinimum( 0.91 );
 
 		h_reCorr[iabsEtaBins][iCentBins]->SetTitle(Form("JES %s",his_title.c_str() ) );
 		h_reCorr[iabsEtaBins][iCentBins]->GetYaxis()->SetTitle("#mu_{Reco./Gen.} akPu4PF");	
+    h_reCorr[iabsEtaBins][iCentBins]->SetMarkerStyle(24);
+    h_reCorr[iabsEtaBins][iCentBins]->SetMarkerColor(4);
+
+
     h_reCorr[iabsEtaBins][iCentBins]->Draw();
     le[iabsEtaBins][iCentBins]->Draw();
+    f2_p[iabsEtaBins][iCentBins]->SetRange(30,600);
+    f2_p[iabsEtaBins][iCentBins]->SetLineStyle(7);
+    f2_p[iabsEtaBins][iCentBins]->Draw("SAME");
+    f1_p[iabsEtaBins][iCentBins]->Draw("SAME");
+
+
   }
   C_plot[iabsEtaBins][counter]->SaveAs(Form("./fitPlot/fitPtCorr_%s_%s.pdf",his_title.c_str(),EtaRange.c_str()) );
 
@@ -81,7 +99,8 @@ void plotJECResidualCorr()
 {
 	TFile *f_read = new TFile("RESIDUALCORR.root","READ");
 	cout<<"plot the fittting result in file : "<<"RESIDUALCORR.root"<<endl; 
-	gStyle->SetOptFit(1111);
+  gStyle->SetMarkerStyle(24);
+	gStyle->SetOptFit(1112);
 	gStyle->SetOptStat(0);
 
 	plotfit("IresCorr", f_read, "Inclusice");

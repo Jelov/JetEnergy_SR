@@ -15,6 +15,10 @@ const std::string resString2 = "RESIDUAL2HIST.root";
 const Int_t nCentBins = 3;
 const Int_t centBins[nCentBins+1] = {0, 10, 30, 100};
 
+double absEtaBin[] = {0,1.5,2};
+const int nabsEtaBins = sizeof(absEtaBin)/sizeof(absEtaBin[0])-1;
+
+
 //TCanvas *c_fit = new TCanvas("c_fit","c_fit");
 double para_c = 0;
 double para_s = 0;
@@ -23,7 +27,7 @@ void FitSigma(TH1F* hist_p,int iter, TH1F* histPerph_p = NULL)
 {
   if(hist_p->GetEntries() == 0) return;
 
-  TF1* f1_p = new TF1("f1_p", Form("TMath::Sqrt( [0]*[0] + [1]*[1]/x + [2]*[2]/x/x )"), 40, hist_p->GetXaxis()->GetXmax());
+  TF1* f1_p = new TF1("f1_p", Form("TMath::Sqrt( [0]*[0] + [1]*[1]/x + [2]*[2]/x/x )"), 30, hist_p->GetXaxis()->GetXmax());
 
   Float_t xVal0 = hist_p->GetBinCenter(1);
   Float_t xVal1 = hist_p->GetBinCenter((Int_t)(hist_p->GetNbinsX()/2));
@@ -67,16 +71,20 @@ void FitSigma(TH1F* hist_p,int iter, TH1F* histPerph_p = NULL)
 	f1_p->FixParameter(1, para_s);
 	}	
   f1_p->SetParameter(2, par2);
+  f1_p->SetParLimits(1, .000, 500);
+  f1_p->SetParLimits(2, .000, 500);
+
+
 
 	cout<<"iter = "<<iter<<endl;
   cout<<"inital par0 C= "<<f1_p->GetParameter(0)<<" ,par1 S= "<<f1_p->GetParameter(1)<<" ,par2 N= "<<f1_p->GetParameter(2)<<endl;
 
 
-  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
-  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
-  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
-  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
-  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
+//  hist_p->Fit("f1_p", "Q M", "", 40, hist_p->GetXaxis()->GetXmax());
+  hist_p->Fit("f1_p", "Q M", "", 70, 250);
+  hist_p->Fit("f1_p", "Q M", "", 70, 250);
+  hist_p->Fit("f1_p", "Q M", "", 70, 250);
+  hist_p->Fit("f1_p", "Q M", "", 70, 250);
 
 	if(iter == 0){
 	para_c = f1_p->GetParameter(0);
@@ -114,23 +122,30 @@ void fitJER_pp()
 
 	const std::string inFileName = "../Jec_ak4PF_pp.root";
   TFile* inFile_p = new TFile(inFileName.c_str(), "READ");
-  TH1F* sigmaHist_p[nCentBins];
+  TH1F* sigmaHist_p[nabsEtaBins][nCentBins];
 
-  TH1F* BsigmaHist_p[nCentBins];
-  TH1F* csvBsigmaHist_p[nCentBins];
-  TH1F* FCRBsigmaHist_p[nCentBins];
-  TH1F* FCRcsvBsigmaHist_p[nCentBins];
+  TH1F* BsigmaHist_p[nabsEtaBins][nCentBins];
+  TH1F* csvBsigmaHist_p[nabsEtaBins][nCentBins];
+  TH1F* FCRBsigmaHist_p[nabsEtaBins][nCentBins];
+  TH1F* FCRcsvBsigmaHist_p[nabsEtaBins][nCentBins];
 
 //  TH1F* recoToGenHist_p[nCentBins];
 
 //  for(Int_t iter = 0; iter < nCentBins; iter++)
 //	for(Int_t iter = nCentBins-1; iter>=0; iter--)
 //{
-	Int_t iter=0;
-    sigmaHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp"));
-    BsigmaHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_B_FitSigma_ak4PF_pp"));
-    csvBsigmaHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp"));
-    FCRBsigmaHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp"));
+  const char* EtaRangeArr[] ={"eta0to15","eta15to20"};
+    std::string EtaRange = "eta0to15";
+	    Int_t iter=0;
+
+
+	for(Int_t iabsEtaBins=0; iabsEtaBins<nabsEtaBins; iabsEtaBins++){
+    EtaRange = EtaRangeArr[iabsEtaBins];
+
+    sigmaHist_p[iabsEtaBins][iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_Inc_FitSigma_ak4PF_pp_%s",EtaRange.c_str()));
+    BsigmaHist_p[iabsEtaBins][iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_B_FitSigma_ak4PF_pp_%s",EtaRange.c_str()));
+    csvBsigmaHist_p[iabsEtaBins][iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_csvB_FitSigma_ak4PF_pp_%s",EtaRange.c_str()));
+    FCRBsigmaHist_p[iabsEtaBins][iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_FCRB_FitSigma_ak4PF_pp_%s",EtaRange.c_str()));
 //    FCRcsvBsigmaHist_p[iter] = (TH1F*)inFile_p->Get(Form("jtRecoOverGenVPt_FCRcsvB_FitSigma_akPu4PF_cent%dto%d_h", centBins[iter], centBins[iter+1]));
 
 
@@ -138,11 +153,13 @@ void fitJER_pp()
 
 //    std::cout << "iter: " << iter << std::endl;
 
-    FitSigma(sigmaHist_p[iter],iter);
-		FitSigma(BsigmaHist_p[iter],iter);
-		FitSigma(csvBsigmaHist_p[iter],iter);
-		FitSigma(FCRBsigmaHist_p[iter],iter);
+    FitSigma(sigmaHist_p[iabsEtaBins][iter],iter);
+		FitSigma(BsigmaHist_p[iabsEtaBins][iter],iter);
+		FitSigma(csvBsigmaHist_p[iabsEtaBins][iter],iter);
+		FitSigma(FCRBsigmaHist_p[iabsEtaBins][iter],iter);
 //}
+	} // end for iabsEtaBins
+
 /*
   for(Int_t iter = nCentBins-1; iter>=0; iter--){ 
 FitSigma(BsigmaHist_p[iter],iter);
@@ -160,19 +177,23 @@ FitSigma(BsigmaHist_p[iter],iter);
 	cout<<"input file : "<<inFileName<<endl;
 	cout<<"output file : "<<outFileName<<endl;
   
-  TFile* outFile_p = new TFile(outFileName.c_str(), "UPDATE");
+  TFile* outFile_p = new TFile(outFileName.c_str(), "RECREATE");
   TNamed pathStr(Form("pathStr"), inFileName.c_str());
   pathStr.Write("", TObject::kOverwrite);
   
+ for(int iabsEtaBins = 0 ; iabsEtaBins <nabsEtaBins ;iabsEtaBins++){
+    EtaRange = EtaRangeArr[iabsEtaBins];
+
 //  for(Int_t iter = 0; iter < nCentBins; iter++){
-    sigmaHist_p[iter]->Write(Form("JER_pp"), TObject::kOverwrite);
-    BsigmaHist_p[iter]->Write(Form("BJER_pp"), TObject::kOverwrite);
-    csvBsigmaHist_p[iter]->Write(Form("csvBJER_pp"), TObject::kOverwrite);
-    FCRBsigmaHist_p[iter]->Write(Form("FCRBJER_pp"), TObject::kOverwrite);
+    sigmaHist_p[iabsEtaBins][iter]->Write(Form("JER_pp_%s",EtaRange.c_str()), TObject::kOverwrite);
+    BsigmaHist_p[iabsEtaBins][iter]->Write(Form("BJER_pp_%s",EtaRange.c_str()), TObject::kOverwrite);
+    csvBsigmaHist_p[iabsEtaBins][iter]->Write(Form("csvBJER_pp_%s",EtaRange.c_str()), TObject::kOverwrite);
+    FCRBsigmaHist_p[iabsEtaBins][iter]->Write(Form("FCRBJER_pp_%s",EtaRange.c_str()), TObject::kOverwrite);
 //    FCRcsvBsigmaHist_p[iter]->Write(Form("FCRcsvBJERCorr_cent%dto%d_h", centBins[iter], centBins[iter+1]), TObject::kOverwrite);
 
  //   recoToGenHist_p[iter]->Write("", TObject::kOverwrite);
 //  }
+	}// end for iabsEtaBins
   outFile_p->Close();
   delete outFile_p;
 
